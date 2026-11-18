@@ -10,7 +10,7 @@
 
 Updated by the agent at each workflow step (CLAUDE.md §2.1).
 
-- **2026-11-18:** Docs done (all OQs decided, scope frozen). No code yet; the folder is not yet a git repository. Next: create the GitHub repository and labels (owner to choose private or public), then draft the issue for feature 000 `workspace`.
+- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository `vietnguyen1404/muse-space-lab` created with labels `needs-review` and `ready`. No code yet. Next: draft the issue for feature 000 `workspace`.
 
 ## Sequencing principle
 
