@@ -15,7 +15,7 @@ The first commit on branch `001-boundary-rules` holds `spec.md`, `plan.md` and t
 
 ## US2 — Clear failure, part of the normal checks
 
-- [ ] **T004** `pnpm lint` runs depcruise on the repo. Check: passes on today's repo with no warnings; a temporary violation under `packages/` fails with rule, file and dependency (output recorded for the PR), then deleted (FR-007, FR-008).
+- [x] **T004** `pnpm lint` runs depcruise on the repo. Check: passes on today's repo with no warnings; a temporary violation under `packages/` fails with rule, file and dependency (output recorded for the PR), then deleted (FR-007, FR-008).
   Files: `package.json`
 
 ## US3 — CI proof

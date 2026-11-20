@@ -15,7 +15,7 @@
     "vitest": "^5.0.5"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . && depcruise --config .dependency-cruiser.mjs --output-type err .",
     "typecheck": "tsc",
     "test": "vitest run --passWithNoTests"
   }
