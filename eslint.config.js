@@ -22,4 +22,6 @@ export default defineConfig(
       ],
     },
   },
+  // Claude Code hook scripts run on Node.js.
+  { files: [".claude/hooks/**"], languageOptions: { globals: { process: "readonly" } } },
 );
