@@ -20,6 +20,7 @@ Updated by the agent at each workflow step (CLAUDE.md §2.1).
 - **2026-11-20:** Open: `minimatch` Dependabot alert (moderate, dev only); fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73, which Dependabot proposes once they pass the 21-day release age (about 2026-12-07). Next after merge: phase B, feature 002 `story-schema`.
 - **2026-11-20:** Feature 001 merged (PR #7, issue #6 closed); phase A done, retro applied in PR #7. Branch `process-dev-hooks` (owner request, not a roadmap feature): Lefthook git hooks (gitleaks, Prettier, ESLint, typecheck) and Claude Code agent hooks; owner reviewed the changes, PR open. Next: phase B, feature 002 `story-schema`.
 - **2026-11-20:** Git hooks and agent hooks merged (PR #8, 5 Claude review rounds). Retro: agent may edit the hook scripts in `.claude/hooks/` (reviewed in PRs; settings and git hook config stay owner-only); review-workflow changes get their own PR. Branch `process-retro-hooks`. Next: phase B, feature 002 `story-schema`.
+- **2026-11-20:** PR #9 merged. Review rounds: at most 2 Claude review rounds, then label `needs-owner` with one summary for the owner; agent self-review before `claude-review` (PR #10). The workflow part (reviewer roles, round-2 review of new commits only, earlier threads) is PR #11.
 
 ## Sequencing principle
 
