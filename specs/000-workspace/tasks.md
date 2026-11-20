@@ -22,7 +22,7 @@ The first commit on branch `000-workspace` holds `spec.md`, `plan.md` and this f
 
 ## US3 — CI runs the checks on every change
 
-- [ ] **T005** CI workflow. Push the branch, open a draft PR, CI green (FR-003, FR-008, FR-009, SC-003). Push the three mistakes to `000-workspace-ci-check`, link the failed run in the PR, delete the branch (SC-002).
+- [x] **T005** CI workflow. Push the branch, open a draft PR, CI green (FR-003, FR-008, FR-009, SC-003). Push the three mistakes to `000-workspace-ci-check`, link the failed run in the PR, delete the branch (SC-002).
   Files: `.github/workflows/ci.yml`
 
 ## Docs
