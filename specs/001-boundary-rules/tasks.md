@@ -8,7 +8,7 @@ The first commit on branch `001-boundary-rules` holds `spec.md`, `plan.md` and t
 
 - [x] **T001** Add dependency-cruiser; fixtures + test for rules 3–5 (`supabase-only-api-and-sign-in`, `db-only-api`, `visitor-no-backend` incl. a transitive chain); test fails, then `.dependency-cruiser.cjs` makes it pass. Exclude `tests/fixtures/` from typecheck and lint (FR-001, FR-002, FR-003, FR-009, FR-010). AC-11 (setup).
   Files: `package.json`, `pnpm-lock.yaml`, `.dependency-cruiser.cjs`, `tsconfig.json`, `eslint.config.js`, `tests/boundaries/dependency-cruiser.test.ts`, `tests/fixtures/boundaries/**`
-- [ ] **T002** Fixtures + tests for rules 6–7 (`pure-no-node-builtins`, `pure-allowlist` incl. a relative path out of the package, `engine-no-business-rules`, `runtime-no-engine`, `runtime-no-backend`); fail, then add the rules (FR-004, FR-005, FR-006, FR-009).
+- [x] **T002** Fixtures + tests for rules 6–7 (`pure-no-node-builtins`, `pure-allowlist` incl. a relative path out of the package, `engine-no-business-rules`, `runtime-no-engine`, `runtime-no-backend`); fail, then add the rules (FR-004, FR-005, FR-006, FR-009).
   Files: `.dependency-cruiser.cjs`, `tests/boundaries/dependency-cruiser.test.ts`, `tests/fixtures/boundaries/**`
 - [ ] **T003** [P] Network globals: fixture + test with ESLint's API; fail, then add the `no-restricted-globals` block (FR-004, FR-006, FR-009).
   Files: `eslint.config.js`, `tests/boundaries/eslint.test.ts`, `tests/fixtures/boundaries/**`

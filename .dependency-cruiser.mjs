@@ -4,6 +4,7 @@
 
 const SUPABASE = "(^|node_modules/)@supabase/";
 const DB = "(^|node_modules/)(drizzle-orm|drizzle-kit|postgres|pg)(/|$)";
+const PURE = "^packages/(story-schema|gallery-layout|domain)/";
 
 /** @type {import('dependency-cruiser').IConfiguration} */
 export default {
@@ -31,6 +32,44 @@ export default {
         reachable: true,
         path: ["^apps/web/src/(creator-studio|auth)/", "^apps/api/", SUPABASE, DB],
       },
+    },
+    {
+      name: "pure-no-node-builtins",
+      comment: "Rule 6: story-schema, gallery-layout and domain do no I/O, so no Node.js built-in modules.",
+      severity: "error",
+      from: { path: PURE },
+      to: { dependencyTypes: ["core"] },
+    },
+    {
+      name: "pure-allowlist",
+      comment: "Rule 6: story-schema, gallery-layout and domain may use only zod and the pure packages plus contracts.",
+      severity: "error",
+      from: { path: PURE },
+      to: {
+        dependencyTypesNot: ["core"],
+        pathNot: ["^packages/(story-schema|gallery-layout|domain|contracts)/", "(^|node_modules/)zod(/|$)"],
+      },
+    },
+    {
+      name: "engine-no-business-rules",
+      comment: "Rule 7: gallery-engine contains no business rules, so it never uses domain.",
+      severity: "error",
+      from: { path: "^packages/gallery-engine/" },
+      to: { path: "^packages/domain/" },
+    },
+    {
+      name: "runtime-no-engine",
+      comment: "Rule 7: story-runtime only emits events; it never controls gallery-engine directly.",
+      severity: "error",
+      from: { path: "^packages/story-runtime/" },
+      to: { path: "^packages/gallery-engine/" },
+    },
+    {
+      name: "runtime-no-backend",
+      comment: "Rule 7: story-runtime never calls the API: no apps, Supabase or database.",
+      severity: "error",
+      from: { path: "^packages/story-runtime/" },
+      to: { path: ["^apps/", SUPABASE, DB] },
     },
   ],
   options: {
