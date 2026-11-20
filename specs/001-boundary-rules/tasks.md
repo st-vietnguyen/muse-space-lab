@@ -20,10 +20,10 @@ The first commit on branch `001-boundary-rules` holds `spec.md`, `plan.md` and t
 
 ## US3 — CI proof
 
-- [ ] **T005** Push the branch, open a draft PR, CI green (SC-003). Push one violation to `001-boundary-rules-ci-check`, link the failed run in the PR, delete the branch (SC-002).
+- [x] **T005** Push the branch, open a draft PR, CI green (SC-003). Push one violation to `001-boundary-rules-ci-check`, link the failed run in the PR, delete the branch (SC-002).
   Files: none
 
 ## Docs
 
-- [ ] **T006** HLD §10 (web areas incl. `auth/`, tool chosen) and §11 "Boundaries" row; README; `notes.md` (TypeScript 7 risk); ROADMAP "Current status".
+- [x] **T006** HLD §10 (web areas incl. `auth/`, tool chosen) and §11 "Boundaries" row; README; `notes.md` (TypeScript 7 risk); ROADMAP "Current status".
   Files: `docs/HLD.md`, `README.md`, `specs/001-boundary-rules/notes.md`, `docs/ROADMAP.md`

@@ -16,6 +16,7 @@ Updated by the agent at each workflow step (CLAUDE.md §2.1).
 - **2026-11-20:** Process updates from the feature 000 retro merged (PR #3).
 - **2026-11-20:** Review pipeline (PR labels, Claude review, dependency audit, secret scan, Dependabot, SHA-pinned actions) merged (PR #4). Dependabot alerts enabled.
 - **2026-11-20:** Next: remove and re-add the `claude-review` label on PR #4 for the first real Claude review (the workflow could not run on the PR that added it); then phase A continues with feature 001 `boundary-rules`. Open owner decision: remove the old collaborator account `vietnguyen1404` from the repository.
+- **2026-11-20:** Feature 001 `boundary-rules` is issue #6 (relabeled `ready`); spec, plan and tasks approved (incl. dependency-cruiser); T001–T006 done on branch `001-boundary-rules`, CI green; draft PR open.
 
 ## Sequencing principle
 

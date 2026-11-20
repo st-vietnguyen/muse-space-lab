@@ -377,7 +377,7 @@ Local and CI share `supabase/config.toml`. Supabase Free: 500 MB DB, 1 GB storag
 ```text
 musespace/
 ├── apps/
-│   ├── web/          # public-pages/, creator-studio/ (incl. Story Director), visitor-experience/, ui/ (shared components)
+│   ├── web/          # src/: public-pages/, creator-studio/ (incl. Story Director, all Creator API calls), visitor-experience/, auth/ (sign-in), ui/ (shared components)
 │   └── api/          # incl. Media Service, Publishing Service
 ├── packages/         # domain, contracts, gallery-engine, gallery-layout, story-runtime, story-schema
 ├── supabase/         # config.toml
@@ -398,7 +398,7 @@ musespace/
 | `domain` | Cross-entity rules: publish validation, ownership, snapshot building | Framework, I/O |
 | `contracts` | API request/response types and snapshot type (incl. `snapshotVersion`) | Logic |
 
-Shared UI components live in `apps/web/ui/`, not in a package: there is only one web app.
+Shared UI components live in `apps/web/src/ui/`, not in a package: there is only one web app.
 
 Dependency direction (arrow = may import; green = pure code):
 
@@ -414,7 +414,7 @@ flowchart TD
     class schema,layout,domain pure
 ```
 
-Only `apps/api` and the sign-in part of `apps/web` may import the Supabase SDK. Boundaries are enforced automatically in CI (dependency-cruiser or `eslint-plugin-boundaries`, chosen in feature 001).
+Only `apps/api` and the sign-in part of `apps/web` (`apps/web/src/auth/`) may import the Supabase SDK. CLAUDE.md §3 rules 3–7 are enforced in `pnpm lint`, so in CI: import rules by path in `.dependency-cruiser.mjs` (dependency-cruiser), network globals in `eslint.config.js` (feature 001). Each rule is proven by `tests/boundaries/`.
 
 ---
 
@@ -440,6 +440,7 @@ Only `apps/api` and the sign-in part of `apps/web` may import the Supabase SDK. 
 | Hosting (demo) | Cloudflare Pages (web, OQ-20), Render (API) |
 | Tests | Vitest (unit), Playwright (E2E) |
 | Lint | ESLint + typescript-eslint (approved by the owner 2026-11-20, feature 000) |
+| Boundaries | dependency-cruiser (approved by the owner 2026-11-20, feature 001) |
 | Monorepo / CI | pnpm workspaces / GitHub Actions |
 
 ---
