@@ -6,7 +6,7 @@
 
 The repository holds only docs. Every later feature needs one shared way to install, lint, type-check and test code, locally and in CI, before any package exists. This feature provides that and nothing else; packages and apps are created by the first feature that needs them (story-schema in 002, the web app in 004). It is also the first run of the manual GitHub flow, so it stays small. Feature 001 builds on it by adding package boundary rules to the same checks.
 
-**Sources:** ROADMAP 000, "Feature size" · HLD §10 (monorepo layout `packages/*`, `apps/*`), §11 (pnpm workspaces, Node ≥ 24.22.1, Vitest, GitHub Actions) · CLAUDE.md §4 (`pnpm lint`, `pnpm typecheck`, `pnpm test` gate every task) · AC: none directly, enables AC-13, AC-14 · OQ: none.
+**Sources:** ROADMAP 000, "Feature size" · HLD §10 (monorepo layout `packages/*`, `apps/*`), §11 (pnpm workspaces, Node.js version in `.nvmrc`, Vitest, GitHub Actions) · CLAUDE.md §4 (`pnpm lint`, `pnpm typecheck`, `pnpm test` gate every task) · AC: none directly, enables AC-13, AC-14 · OQ: none.
 
 ## User scenarios
 
@@ -58,7 +58,7 @@ The owner sees, on every pull request, whether its latest commit passed the chec
 ## Functional requirements
 
 - **FR-001** The repo MUST be a workspace whose members are every folder under `packages/` and `apps/`.
-- **FR-002** Install MUST refuse a Node.js version below 24.22.1 (owner decision 2026-11-20: patched release) and print the required range.
+- **FR-002** Install MUST refuse a Node.js version below the one in `.nvmrc` and print the required range.
 - **FR-003** The package manager version MUST be pinned in the repo, and CI MUST use the same Node.js and package manager versions as local development.
 - **FR-004** `pnpm lint`, `pnpm typecheck` and `pnpm test` MUST run from the repo root and cover all workspace members without per-member changes.
 - **FR-005** Type checking MUST be strict.

@@ -4,7 +4,7 @@ Online art exhibitions where each artwork tells its story in a cinematic way. Pr
 
 ## Setup
 
-Requires Node.js 24.22.1 or newer (see `.nvmrc`) and Corepack, which ships with Node.js.
+Requires the Node.js version in `.nvmrc` (or newer) and Corepack, which ships with Node.js.
 
 ```sh
 corepack enable   # once per machine; provides the pnpm version pinned in package.json
