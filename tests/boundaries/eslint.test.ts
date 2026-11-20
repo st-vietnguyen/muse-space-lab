@@ -15,5 +15,6 @@ test("network globals are reported in the pure packages and story-runtime only",
   expect(violations).toEqual([
     "no-restricted-globals: packages/domain/src/network.ts",
     "no-restricted-globals: packages/story-runtime/src/network.ts",
+    "no-restricted-properties: packages/gallery-layout/src/network.ts",
   ]);
 });

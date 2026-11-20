@@ -8,8 +8,8 @@
 ## Risks
 
 - dependency-cruiser 18.7.0 supports TypeScript `>=2 <7`. A TypeScript 7 upgrade must wait until dependency-cruiser supports it.
-- `no-restricted-globals` does not see `globalThis.fetch` or `window.fetch`. Accepted for the lab: it catches the normal call; deliberate workarounds are for review.
 
 ## Review fixes
 
 - **Claude review (PR #7), untested area:** an import by workspace package name (`@musespace/domain`) was not resolved, so no path rule applied to it (verified: a `gallery-engine` → `@musespace/domain` import passed). Cause: dependency-cruiser ignores `package.json` `exports` by default. Fix: `enhancedResolveOptions.exportsFields`; new fixture `business-rules-by-name.ts` with a pnpm-style link in `tests/fixtures/boundaries/node_modules/` (un-ignored in `.gitignore`).
+- **Claude review (PR #7), nit:** `globalThis.fetch`, `window.fetch`, `self.fetch` passed `no-restricted-globals`. Fix: `no-restricted-properties` for those objects, plus fixture `packages/gallery-layout/src/network.ts`. Still not caught: aliasing the global object (`const g = globalThis; g.fetch()`); left to review.

@@ -2,6 +2,9 @@ import js from "@eslint/js";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
+const NETWORK = ["fetch", "XMLHttpRequest", "WebSocket", "EventSource"];
+const NO_NETWORK = "Rules 6–7: pure packages and story-runtime make no network calls.";
+
 export default defineConfig(
   { ignores: ["**/dist/"] },
   js.configs.recommended,
@@ -10,12 +13,12 @@ export default defineConfig(
   {
     files: ["packages/{story-schema,gallery-layout,domain,story-runtime}/**"],
     rules: {
-      "no-restricted-globals": [
+      "no-restricted-globals": ["error", ...NETWORK.map((name) => ({ name, message: NO_NETWORK }))],
+      "no-restricted-properties": [
         "error",
-        ...["fetch", "XMLHttpRequest", "WebSocket", "EventSource"].map((name) => ({
-          name,
-          message: "Rules 6–7: pure packages and story-runtime make no network calls.",
-        })),
+        ...["globalThis", "window", "self"].flatMap((object) =>
+          NETWORK.map((property) => ({ object, property, message: NO_NETWORK })),
+        ),
       ],
     },
   },
