@@ -6,7 +6,7 @@ The first commit on branch `000-workspace` holds `spec.md`, `plan.md` and this f
 
 ## US1 — Set up and run the checks
 
-- [ ] **T001** Workspace root. Check: `pnpm install` works; with `engines.node` set to `">=99"` it fails naming the range (FR-001, FR-002, FR-003).
+- [x] **T001** Workspace root. Check: `pnpm install` works; with `engines.node` set to `">=99"` it fails naming the range (FR-001, FR-002, FR-003).
   Files: `package.json`, `pnpm-workspace.yaml`, `.npmrc`, `.nvmrc`, `pnpm-lock.yaml`
 
 ## US2 — Mistakes fail the checks
