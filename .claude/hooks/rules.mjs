@@ -8,11 +8,12 @@ const ALLOWED_ENV_FILE = ".env.example";
 const ENV_REASON = "Blocked: .env files hold secrets (CLAUDE.md §6). Only .env.example may be read.";
 
 // Files that turn the checks off when changed: git hooks, Lefthook config (incl. the local override), gitleaks
-// config (allowlists) and this guard itself. Only the owner edits them.
-const HOOK_FILE = String.raw`(\.git/hooks\b|\.?lefthook(-local)?\.ya?ml\b|\.gitleaks(\.toml|ignore)\b|\.claude/(settings(\.local)?\.json|hooks/))`;
+// config (allowlists) and the Claude Code settings that register the agent hooks. Only the owner edits them.
+// The hook scripts in .claude/hooks/ are not listed: they are code, reviewed in the PR like any other code.
+const HOOK_FILE = String.raw`(\.git/hooks\b|\.?lefthook(-local)?\.ya?ml\b|\.gitleaks(\.toml|ignore)\b|\.claude/settings(\.local)?\.json\b)`;
 const HOOK_FILE_PATH = new RegExp(`(^|/)${HOOK_FILE}`);
 const HOOK_REASON =
-  "Blocked: git hooks, Lefthook and gitleaks config and the agent hooks are changed only by the owner.";
+  "Blocked: git hooks, Lefthook and gitleaks config and Claude Code settings are changed only by the owner.";
 const WRITE_TOOLS = ["Edit", "MultiEdit", "Write", "NotebookEdit"];
 
 // `git` plus any global options before the subcommand (`git -C . push`, `git --no-pager clean`).
