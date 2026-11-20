@@ -439,6 +439,7 @@ Only `apps/api` and the sign-in part of `apps/web` may import the Supabase SDK. 
 | Local Environment | Supabase CLI, Dev Containers |
 | Hosting (demo) | Cloudflare Pages (web, OQ-20), Render (API) |
 | Tests | Vitest (unit), Playwright (E2E) |
+| Lint | ESLint + typescript-eslint (approved by the owner 2026-11-20, feature 000) |
 | Monorepo / CI | pnpm workspaces / GitHub Actions |
 
 ---
