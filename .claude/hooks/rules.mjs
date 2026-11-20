@@ -14,24 +14,27 @@ const HOOK_REASON = "Blocked: git hooks, lefthook.yml and the agent hooks are ch
 const WRITE_TOOLS = ["Edit", "MultiEdit", "Write", "NotebookEdit"];
 
 // `git` plus any global options before the subcommand (`git -C . push`, `git --no-pager clean`).
+// The flag patterns after it use `[^;&|]*` so they stay inside one command (`git push x && rm -f a` is fine).
 /** @param {string} subcommand */
 const git = (subcommand) => String.raw`\bgit(\s+-\S+(\s+[^\s-]\S*)?)*\s+${subcommand}\b`;
 
 /** @type {[RegExp, string][]} */
 const DESTRUCTIVE = [
   [
-    new RegExp(git("push") + String.raw`.*(\s--force(-with-lease)?\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s--mirror\b|\s\+\S+)`),
+    new RegExp(
+      git("push") + String.raw`[^;&|]*(\s--force(-with-lease)?\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s--mirror\b|\s\+\S+)`,
+    ),
     "git push --force",
   ],
-  [new RegExp(git("reset") + String.raw`.*\s--hard\b`), "git reset --hard"],
-  [new RegExp(git("clean") + String.raw`.*\s-[a-zA-Z]*f`), "git clean -f"],
-  [new RegExp(git("branch") + String.raw`.*\s(-D\b|--delete\s+--force\b|--force\s+--delete\b)`), "git branch -D"],
+  [new RegExp(git("reset") + String.raw`[^;&|]*\s--hard\b`), "git reset --hard"],
+  [new RegExp(git("clean") + String.raw`[^;&|]*\s-[a-zA-Z]*f`), "git clean -f"],
+  [new RegExp(git("branch") + String.raw`[^;&|]*\s(-D\b|--delete\s+--force\b|--force\s+--delete\b)`), "git branch -D"],
 ];
 
 /** @type {[RegExp, string][]} */
 const SKIP_HOOKS = [
   [/--no-verify\b/, "--no-verify"],
-  [new RegExp(git("commit") + String.raw`.*\s-[a-zA-Z]*n[a-zA-Z]*\b`), "git commit -n"],
+  [new RegExp(git("commit") + String.raw`[^;&|]*\s-[a-zA-Z]*n[a-zA-Z]*\b`), "git commit -n"],
   [/\bLEFTHOOK(_EXCLUDE)?=/, "LEFTHOOK=0"],
   [/\bcore\.hooksPath\b/, "core.hooksPath"],
   [/\blefthook\s+uninstall\b/, "lefthook uninstall"],
@@ -41,11 +44,17 @@ const SKIP_HOOKS = [
   ],
 ];
 
-/** `rm` with both a recursive and a force flag, in any order or spelling. @param {string} command */
+/**
+ * `rm` with both a recursive and a force flag, in any order or position (`rm -rf x`, `rm -r x -f`, `rm x -rf`).
+ * @param {string} command
+ */
 function isRmRf(command) {
-  return [...command.matchAll(/\brm((?:\s+-\S+)+)/g)].some(([, flags = ""]) => {
-    const recursive = /\s-[a-zA-Z]*[rR]|\s--recursive\b/.test(flags);
-    const force = /\s-[a-zA-Z]*f|\s--force\b/.test(flags);
+  return command.split(/[;&|]/).some((segment) => {
+    const args = segment.match(/\brm\s+(.*)/)?.[1];
+    if (args === undefined) return false;
+    const flags = args.split(/\s+/).filter((token) => token.startsWith("-"));
+    const recursive = flags.some((f) => /^-[a-zA-Z]*[rR]/.test(f) || f === "--recursive");
+    const force = flags.some((f) => /^-[a-zA-Z]*f/.test(f) || f === "--force");
     return recursive && force;
   });
 }
