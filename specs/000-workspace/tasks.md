@@ -27,5 +27,5 @@ The first commit on branch `000-workspace` holds `spec.md`, `plan.md` and this f
 
 ## Docs
 
-- [ ] **T006** README with setup and the three commands; update ROADMAP "Current status" (FR-010, SC-001).
+- [x] **T006** README with setup and the three commands; update ROADMAP "Current status" (FR-010, SC-001).
   Files: `README.md`, `docs/ROADMAP.md`
