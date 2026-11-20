@@ -31,6 +31,9 @@ describe("agent guard blocks", () => {
     "pnpm exec lefthook uninstall",
     "rm .git/hooks/pre-commit",
     "echo exit 0 > .git/hooks/pre-commit",
+    "sed -i '' 's/gitleaks/true/' lefthook.yml",
+    "cp /tmp/x .claude/settings.json",
+    "echo '' > .claude/hooks/rules.mjs",
   ])("skipping git hooks: %s", (command) => {
     expect(bash(command)).toMatch(/git hooks/);
   });
@@ -52,6 +55,16 @@ describe("agent guard blocks", () => {
     ["Glob", { pattern: "**/.env.*" }],
   ])(".env in a file tool: %s %o", (tool, input) => {
     expect(check(tool, input)).toMatch(/\.env files/);
+  });
+
+  test.each([
+    ["Write", { file_path: "/repo/.git/hooks/pre-commit" }],
+    ["Edit", { file_path: "/repo/lefthook.yml" }],
+    ["Edit", { file_path: "/repo/.claude/settings.json" }],
+    ["Write", { file_path: "/repo/.claude/settings.local.json" }],
+    ["MultiEdit", { file_path: "/repo/.claude/hooks/rules.mjs" }],
+  ])("writing hook files: %s %o", (tool, input) => {
+    expect(check(tool, input)).toMatch(/hooks/);
   });
 });
 
@@ -77,6 +90,9 @@ describe("agent guard allows", () => {
     ["Read", { file_path: "/repo/src/environment.ts" }],
     ["Grep", { pattern: "\\.env", path: "/repo/src" }],
     ["Glob", { pattern: "**/*.ts" }],
+    ["Read", { file_path: "/repo/lefthook.yml" }],
+    ["Read", { file_path: "/repo/.claude/hooks/rules.mjs" }],
+    ["Edit", { file_path: "/repo/tests/hooks/guard.test.ts" }],
   ])("%s %o", (tool, input) => {
     expect(check(tool, input)).toBeNull();
   });

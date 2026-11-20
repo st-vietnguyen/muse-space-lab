@@ -25,4 +25,4 @@ pnpm format      # fix formatting
 
 Git hooks run before code leaves your machine: `pre-commit` scans staged files for secrets (gitleaks), formats, lints and checks boundaries; `pre-push` runs the type check. Do not skip them (`--no-verify`): a secret that reaches GitHub must be treated as leaked and rotated.
 
-AI agents (Claude Code) also run the hooks in `.claude/settings.json`: destructive commands, skipping git hooks and reading `.env` files are blocked, and every file the agent writes is formatted and linted.
+AI agents (Claude Code) also run the hooks in `.claude/settings.json`: destructive commands, skipping git hooks, editing the hook files (`.git/hooks`, `lefthook.yml`, `.claude/settings*.json`, `.claude/hooks/`) and reading `.env` files are blocked, and every file the agent writes is formatted and linted.

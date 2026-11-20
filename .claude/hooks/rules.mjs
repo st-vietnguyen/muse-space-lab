@@ -7,6 +7,12 @@ const ENV_FILE = /(^|[\s/'"=<>:])\.env([.*][\w.*-]*)?(?![\w.*-])/g;
 const ALLOWED_ENV_FILE = ".env.example";
 const ENV_REASON = "Blocked: .env files hold secrets (CLAUDE.md §6). Only .env.example may be read.";
 
+// Files that turn the checks off when changed: git hooks, their config and this guard itself. Only the owner edits them.
+const HOOK_FILE = String.raw`(\.git/hooks\b|lefthook\.yml\b|\.claude/(settings(\.local)?\.json|hooks/))`;
+const HOOK_FILE_PATH = new RegExp(`(^|/)${HOOK_FILE}`);
+const HOOK_REASON = "Blocked: git hooks, lefthook.yml and the agent hooks are changed only by the owner.";
+const WRITE_TOOLS = ["Edit", "MultiEdit", "Write", "NotebookEdit"];
+
 /** @type {[RegExp, string][]} */
 const DESTRUCTIVE = [
   [/\bgit\s+push\b.*(\s--force(-with-lease)?\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s--mirror\b|\s\+\S+)/, "git push --force"],
@@ -22,7 +28,10 @@ const SKIP_HOOKS = [
   [/\bLEFTHOOK(_EXCLUDE)?=/, "LEFTHOOK=0"],
   [/\bcore\.hooksPath\b/, "core.hooksPath"],
   [/\blefthook\s+uninstall\b/, "lefthook uninstall"],
-  [/(\b(rm|mv|cp|ln|chmod|tee|truncate)\b|>)[^|;&]*\.git\/hooks\b/, "writing .git/hooks"],
+  [
+    new RegExp(String.raw`(\b(rm|mv|cp|ln|chmod|tee|truncate)\b|\bsed\s+-i|>)[^|;&]*${HOOK_FILE}`),
+    "writing hook files",
+  ],
 ];
 
 /** `rm` with both a recursive and a force flag, in any order or spelling. @param {string} command */
@@ -61,5 +70,6 @@ export function check(toolName, input) {
   // File tools. A Grep `pattern` is a regex over file contents, not a path, so it is not checked.
   const fields = toolName === "Grep" ? ["path", "glob"] : ["file_path", "notebook_path", "path", "pattern"];
   const paths = fields.map((f) => input[f]).filter((v) => typeof v === "string");
+  if (WRITE_TOOLS.includes(toolName) && paths.some((p) => HOOK_FILE_PATH.test(p))) return HOOK_REASON;
   return paths.some(touchesEnvFile) ? ENV_REASON : null;
 }
