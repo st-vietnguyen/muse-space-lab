@@ -2,7 +2,9 @@
 
 > Describe what it related
 
-- [Task/Bug URL]()
+- Closes #<issue>
+- Spec: `specs/00X-<name>/` (plan approved on <date>)
+- AC met: <AC-xx, or none>
 - [Related PR URL]()
 
 #### Description

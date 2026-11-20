@@ -10,9 +10,10 @@
 
 Updated by the agent at each workflow step (CLAUDE.md §2.1).
 
-- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository `vietnguyen1404/muse-space-lab` created with labels `needs-review` and `ready`. No code yet.
+- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository created (moved to `st-vietnguyen/muse-space-lab` on 2026-11-20) with labels `needs-review` and `ready`. No code yet.
 - **2026-11-20:** Issue template added (`.github/ISSUE_TEMPLATE/feature.md`). Feature 000 `workspace` is issue #1, label `needs-review`. Relabeled `ready`.
-- **2026-11-20:** Feature 000: spec, plan and tasks approved; T001–T006 done on branch `000-workspace`, CI green; PR open for owner review. Next: owner reviews and merges, then phase A continues with feature 001 `boundary-rules`.
+- **2026-11-20:** Feature 000: spec, plan and tasks approved; T001–T006 done on branch `000-workspace`, CI green; merged in PR #2 (issue #1 closed).
+- **2026-11-20:** Process updates from the feature 000 retro in PR #3. Next: owner merges PR #3, then phase A continues with feature 001 `boundary-rules` under the updated workflow.
 
 ## Sequencing principle
 
@@ -33,7 +34,7 @@ Features are grouped into phases. After each phase there is a short retro; lesso
 
 | Phase | Features | Process focus |
 |---|---|---|
-| A — Tooling | 000–001 | Run the manual workflow end to end; the owner approves every task |
+| A — Tooling | 000–001 | Run the manual workflow end to end (000: per-task approval; from 001: owner approves the plan and reviews the PR) |
 | B — Living Canvas | 002–005 | Test-first on pure packages; first skills from the phase A retro |
 | C — Visitor gallery | 006–007 | First 3D work; Playwright scenarios in CI |
 | D — Creator backend | 008–013 | Local Supabase in CI, integration tests |
@@ -44,7 +45,7 @@ Features are grouped into phases. After each phase there is a short retro; lesso
 
 | # | Phase | Feature | Scope | AC | Depends on | Related OQs |
 |---|---|---|---|---|---|---|
-| 000 | A | `workspace` | pnpm workspace, Node ≥ 24.22.1, strict TypeScript, ESLint, Vitest, root `lint`/`typecheck`/`test` scripts, GitHub Actions CI running them | — | — | — |
+| 000 | A | `workspace` | pnpm workspace, Node.js version in `.nvmrc`, strict TypeScript, ESLint, Vitest, root `lint`/`typecheck`/`test` scripts, GitHub Actions CI running them | — | — | — |
 | 001 | A | `boundary-rules` | Choose dependency-cruiser or `eslint-plugin-boundaries` (HLD §10); encode CLAUDE.md §3 rules 3–7 by path; a fixture per rule proves CI fails on a violation | AC-11 (setup) | 000 | — |
 | 002 | B | `story-schema` | Story types + Zod schema with the MVP-0 effects, `narration.durationMs`, `startMs`/total duration, validation and limits, `migrate()`; the reference story (HLD §8.2) as a valid fixture | AC-13 | 001 | OQ-09, OQ-11, OQ-23 |
 | 003 | B | `story-clock` | Pure timeline and master clock in `story-runtime` (HLD §6.5): scene at time, seek, pause/resume, lead-in, re-anchoring, buffering, drift, completion; fake-clock tests with the AC-07 thresholds | AC-07, AC-13 | 002 | — |

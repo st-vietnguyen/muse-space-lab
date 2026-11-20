@@ -22,9 +22,9 @@ Working rules for every AI coding agent in this repo. Read this whole file at th
 `specify → clarify → plan → tasks → analyze → implement → PR`
 
 - **Specify**: describe behavior only; no frameworks, libraries or DB tables.
-- **Plan**: use only technologies listed in HLD §11. Adding a library requires a justification in the plan and approval.
+- **Plan**: use only technologies listed in HLD §11. Adding a library requires a justification in the plan and approval. Check every choice against reality before submitting the plan: current versions, peer dependencies, required Node.js version; for tooling, a quick local trial.
 - **Tasks**: grouped by user story; test tasks come before code tasks; `[P]` marks parallel tasks; list affected files; list related `AC-xx` codes.
-- **Implement**: one task at a time. Failing test → code → passing test → report the diff → wait for approval → commit → mark `[x]`.
+- **Implement**: one task at a time. Failing test → code → passing test → commit → push → mark `[x]` only once its checks are verified. The owner reviews once, on the PR. Before deviating from the approved plan (other library, version, task order or scope), stop and ask; list every deviation in the PR.
 - Never mark a feature as done yourself; the reviewer decides.
 
 ### 2.1. GitHub flow (manual phase, from 2026-11-18)
@@ -34,13 +34,13 @@ Each feature in `docs/ROADMAP.md` is one GitHub issue and one PR, within the siz
 1. The agent drafts the GitHub issue from `.github/ISSUE_TEMPLATE/feature.md`, label `needs-review`; the owner reviews and relabels it `ready`. The issue is for people: plain language, no internal doc names, sections, libraries or tables.
 2. The agent reads the `ready` issue (owner-approved, so it counts as a direct request) and writes `specs/00X-<name>/spec.md`, `plan.md` and `tasks.md` **locally**. `spec.md` follows `specs/_template/spec.md` and is for developers and agents: it does not copy the issue but turns it into user scenarios, numbered functional requirements, edge cases, success criteria, constraints and assumptions, with references (ROADMAP, HLD/vision sections, `AC-xx`, `OQ-xx`) and a mapping back to the issue's criteria.
 3. The owner reviews them locally and approves in chat.
-4. The agent creates branch `00X-<name>`; the first commit is spec + plan + tasks; then implements per §2 and pushes to a draft PR (CI runs on every push). The PR description notes the plan-approval date.
-5. CI green → PR ready for review → the owner reviews and merges.
+4. The agent creates branch `00X-<name>`; the first commit is spec + plan + tasks; then implements per §2 and pushes to a draft PR (CI runs on every push). The PR description follows `.github/pull_request_template.md` and notes the plan-approval date.
+5. Before marking the PR ready: run `/code-review` and `/security-review` on the branch (when it contains code) and record the results in the PR. CI green → PR ready for review → the owner reviews and merges.
 6. Retro at the end of each roadmap phase; lessons go into this file, skills or CI.
 
 Keep "Current status" in `docs/ROADMAP.md` up to date at each step.
 
-Phase A (features 000–001) keeps per-task approval (§2 Implement). Relaxing it to one review per PR is decided at the phase A retro. Feature 000 has no CI yet, so run `pnpm lint`, `pnpm typecheck`, `pnpm test` locally before pushing.
+The workflow, templates and this file do not change while a feature is in progress. Proposed changes are noted and applied at the retro.
 
 ## 3. Mandatory architectural principles
 
@@ -64,6 +64,7 @@ Rules 3–7 are checked automatically in CI; if CI reports a violation, fix the 
 - Before reporting a task as done: `pnpm lint`, `pnpm typecheck`, `pnpm test` all pass.
 - Integration tests run on local Supabase (Supabase CLI), never the cloud.
 - DB migrations are created only with Drizzle Kit.
+- A config value has one home: the config file (e.g. the Node.js version in `.nvmrc`). Docs point to that file instead of copying the value.
 
 ## 5. Scope of changes
 
@@ -80,4 +81,5 @@ Rules 3–7 are checked automatically in CI; if CI reports a violation, fix the 
 ## 7. Git
 
 - One branch per feature, `00X-<name>`; small commits, one task per commit, message contains the task ID (e.g. `T003: ...`).
+- Stage files by name, never `git add -A` or `git add .`; check `git status` before every commit.
 - PRs include `Closes #N` (if there is an issue) and list the `AC-xx` codes met. The project owner merges.
