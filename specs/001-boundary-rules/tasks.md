@@ -10,7 +10,7 @@ The first commit on branch `001-boundary-rules` holds `spec.md`, `plan.md` and t
   Files: `package.json`, `pnpm-lock.yaml`, `.dependency-cruiser.cjs`, `tsconfig.json`, `eslint.config.js`, `tests/boundaries/dependency-cruiser.test.ts`, `tests/fixtures/boundaries/**`
 - [x] **T002** Fixtures + tests for rules 6–7 (`pure-no-node-builtins`, `pure-allowlist` incl. a relative path out of the package, `engine-no-business-rules`, `runtime-no-engine`, `runtime-no-backend`); fail, then add the rules (FR-004, FR-005, FR-006, FR-009).
   Files: `.dependency-cruiser.cjs`, `tests/boundaries/dependency-cruiser.test.ts`, `tests/fixtures/boundaries/**`
-- [ ] **T003** [P] Network globals: fixture + test with ESLint's API; fail, then add the `no-restricted-globals` block (FR-004, FR-006, FR-009).
+- [x] **T003** [P] Network globals: fixture + test with ESLint's API; fail, then add the `no-restricted-globals` block (FR-004, FR-006, FR-009).
   Files: `eslint.config.js`, `tests/boundaries/eslint.test.ts`, `tests/fixtures/boundaries/**`
 
 ## US2 — Clear failure, part of the normal checks

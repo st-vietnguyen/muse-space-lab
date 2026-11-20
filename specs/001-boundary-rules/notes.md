@@ -8,3 +8,4 @@
 ## Risks
 
 - dependency-cruiser 18.7.0 supports TypeScript `>=2 <7`. A TypeScript 7 upgrade must wait until dependency-cruiser supports it.
+- `no-restricted-globals` does not see `globalThis.fetch` or `window.fetch`. Accepted for the lab: it catches the normal call; deliberate workarounds are for review.
