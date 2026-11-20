@@ -13,18 +13,25 @@ const HOOK_FILE_PATH = new RegExp(`(^|/)${HOOK_FILE}`);
 const HOOK_REASON = "Blocked: git hooks, lefthook.yml and the agent hooks are changed only by the owner.";
 const WRITE_TOOLS = ["Edit", "MultiEdit", "Write", "NotebookEdit"];
 
+// `git` plus any global options before the subcommand (`git -C . push`, `git --no-pager clean`).
+/** @param {string} subcommand */
+const git = (subcommand) => String.raw`\bgit(\s+-\S+(\s+[^\s-]\S*)?)*\s+${subcommand}\b`;
+
 /** @type {[RegExp, string][]} */
 const DESTRUCTIVE = [
-  [/\bgit\s+push\b.*(\s--force(-with-lease)?\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s--mirror\b|\s\+\S+)/, "git push --force"],
-  [/\bgit\s+reset\b.*\s--hard\b/, "git reset --hard"],
-  [/\bgit\s+clean\b.*\s-[a-zA-Z]*f/, "git clean -f"],
-  [/\bgit\s+branch\b.*\s(-D\b|--delete\s+--force\b|--force\s+--delete\b)/, "git branch -D"],
+  [
+    new RegExp(git("push") + String.raw`.*(\s--force(-with-lease)?\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s--mirror\b|\s\+\S+)`),
+    "git push --force",
+  ],
+  [new RegExp(git("reset") + String.raw`.*\s--hard\b`), "git reset --hard"],
+  [new RegExp(git("clean") + String.raw`.*\s-[a-zA-Z]*f`), "git clean -f"],
+  [new RegExp(git("branch") + String.raw`.*\s(-D\b|--delete\s+--force\b|--force\s+--delete\b)`), "git branch -D"],
 ];
 
 /** @type {[RegExp, string][]} */
 const SKIP_HOOKS = [
   [/--no-verify\b/, "--no-verify"],
-  [/\bgit\s+commit\b.*\s-[a-zA-Z]*n[a-zA-Z]*\b/, "git commit -n"],
+  [new RegExp(git("commit") + String.raw`.*\s-[a-zA-Z]*n[a-zA-Z]*\b`), "git commit -n"],
   [/\bLEFTHOOK(_EXCLUDE)?=/, "LEFTHOOK=0"],
   [/\bcore\.hooksPath\b/, "core.hooksPath"],
   [/\blefthook\s+uninstall\b/, "lefthook uninstall"],

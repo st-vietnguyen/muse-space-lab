@@ -17,6 +17,10 @@ describe("agent guard blocks", () => {
     "git reset --hard HEAD~1",
     "git clean -fd",
     "git branch -D old",
+    "git -C . push --force",
+    "git -C . reset --hard",
+    "git --no-pager clean -fd",
+    "git -c core.pager=cat branch -D old",
   ])("destructive: %s", (command) => {
     expect(bash(command)).toMatch(/destructive/);
   });
@@ -25,6 +29,7 @@ describe("agent guard blocks", () => {
     "git commit --no-verify -m x",
     "git commit -n -m x",
     "git commit -anm x",
+    "git -C . commit -n -m x",
     "git push --no-verify",
     "LEFTHOOK=0 git commit -m x",
     "git config core.hooksPath /dev/null",
@@ -74,6 +79,8 @@ describe("agent guard allows", () => {
     "rm -f notes.txt",
     "git push -u origin 001-boundary-rules",
     "git reset --soft HEAD~1",
+    "git -C . status",
+    "git --no-pager log --oneline -5",
     "git branch -d merged",
     "git commit -m 'fix -n handling'",
     "cat .env.example",
