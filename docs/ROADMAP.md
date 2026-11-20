@@ -10,7 +10,8 @@
 
 Updated by the agent at each workflow step (CLAUDE.md §2.1).
 
-- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository `vietnguyen1404/muse-space-lab` created with labels `needs-review` and `ready`. No code yet. Next: draft the issue for feature 000 `workspace`.
+- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository `vietnguyen1404/muse-space-lab` created with labels `needs-review` and `ready`. No code yet.
+- **2026-11-20:** Issue template added (`.github/ISSUE_TEMPLATE/feature.md`). Feature 000 `workspace` is issue #1, label `needs-review`. Next: owner relabels it `ready`, then the agent writes spec, plan and tasks locally.
 
 ## Sequencing principle
 
