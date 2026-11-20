@@ -41,6 +41,10 @@ describe("agent guard blocks", () => {
     "sed -i '' 's/gitleaks/true/' lefthook.yml",
     "cp /tmp/x .claude/settings.json",
     "echo '' > .claude/hooks/rules.mjs",
+    `echo x > ".git/hooks/pre-commit"`,
+    `git config "core.hooksPath" /dev/null`,
+    "echo x > lefthook-local.yml",
+    "cp /tmp/x .gitleaksignore",
   ])("skipping git hooks: %s", (command) => {
     expect(bash(command)).toMatch(/git hooks/);
   });
@@ -70,6 +74,10 @@ describe("agent guard blocks", () => {
     ["Edit", { file_path: "/repo/.claude/settings.json" }],
     ["Write", { file_path: "/repo/.claude/settings.local.json" }],
     ["MultiEdit", { file_path: "/repo/.claude/hooks/rules.mjs" }],
+    ["Write", { file_path: "/repo/lefthook-local.yml" }],
+    ["Write", { file_path: "/repo/.lefthook.yaml" }],
+    ["Write", { file_path: "/repo/.gitleaks.toml" }],
+    ["Edit", { file_path: "/repo/.gitleaksignore" }],
   ])("writing hook files: %s %o", (tool, input) => {
     expect(check(tool, input)).toMatch(/hooks/);
   });
