@@ -427,7 +427,7 @@ Only `apps/api` and the sign-in part of `apps/web` may import the Supabase SDK. 
 | 3D Gallery | Three.js, React Three Fiber |
 | Animation | GSAP (only in `story-runtime`; the schema and timeline algorithms do not depend on GSAP) |
 | State / Server state | Zustand / TanStack Query |
-| Backend | Node.js ≥ 22, Fastify (ESM) |
+| Backend | Node.js ≥ 24.22.1 (owner decision 2026-11-20: patched release), Fastify (ESM) |
 | Validation | Zod |
 | Database | PostgreSQL (Supabase), Drizzle ORM |
 | Auth | Supabase Auth |
@@ -439,6 +439,7 @@ Only `apps/api` and the sign-in part of `apps/web` may import the Supabase SDK. 
 | Local Environment | Supabase CLI, Dev Containers |
 | Hosting (demo) | Cloudflare Pages (web, OQ-20), Render (API) |
 | Tests | Vitest (unit), Playwright (E2E) |
+| Lint | ESLint + typescript-eslint (approved by the owner 2026-11-20, feature 000) |
 | Monorepo / CI | pnpm workspaces / GitHub Actions |
 
 ---

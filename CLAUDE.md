@@ -32,7 +32,7 @@ Working rules for every AI coding agent in this repo. Read this whole file at th
 Each feature in `docs/ROADMAP.md` is one GitHub issue and one PR, within the size rule there.
 
 1. The agent drafts the GitHub issue from `.github/ISSUE_TEMPLATE/feature.md`, label `needs-review`; the owner reviews and relabels it `ready`. The issue is for people: plain language, no internal doc names, sections, libraries or tables.
-2. The agent reads the `ready` issue (owner-approved, so it counts as a direct request) and writes `specs/00X-<name>/spec.md`, `plan.md` and `tasks.md` **locally**. `spec.md` is for developers and agents: the issue's behavior plus references (ROADMAP, HLD/vision sections, `AC-xx`, `OQ-xx`) and `Closes #N`.
+2. The agent reads the `ready` issue (owner-approved, so it counts as a direct request) and writes `specs/00X-<name>/spec.md`, `plan.md` and `tasks.md` **locally**. `spec.md` follows `specs/_template/spec.md` and is for developers and agents: it does not copy the issue but turns it into user scenarios, numbered functional requirements, edge cases, success criteria, constraints and assumptions, with references (ROADMAP, HLD/vision sections, `AC-xx`, `OQ-xx`) and a mapping back to the issue's criteria.
 3. The owner reviews them locally and approves in chat.
 4. The agent creates branch `00X-<name>`; the first commit is spec + plan + tasks; then implements per §2 and pushes to a draft PR (CI runs on every push). The PR description notes the plan-approval date.
 5. CI green → PR ready for review → the owner reviews and merges.
