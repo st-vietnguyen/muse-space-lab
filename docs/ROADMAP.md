@@ -14,7 +14,8 @@ Updated by the agent at each workflow step (CLAUDE.md §2.1).
 - **2026-11-20:** Issue template added (`.github/ISSUE_TEMPLATE/feature.md`). Feature 000 `workspace` is issue #1, label `needs-review`. Relabeled `ready`.
 - **2026-11-20:** Feature 000: spec, plan and tasks approved; T001–T006 done on branch `000-workspace`, CI green; merged in PR #2 (issue #1 closed).
 - **2026-11-20:** Process updates from the feature 000 retro merged (PR #3).
-- **2026-11-20:** Review pipeline (PR labels, Claude review, dependency audit, secret scan, Dependabot, SHA-pinned actions) in PR #4. Next: owner merges PR #4, then phase A continues with feature 001 `boundary-rules`.
+- **2026-11-20:** Review pipeline (PR labels, Claude review, dependency audit, secret scan, Dependabot, SHA-pinned actions) merged (PR #4). Dependabot alerts enabled.
+- **2026-11-20:** Next: remove and re-add the `claude-review` label on PR #4 for the first real Claude review (the workflow could not run on the PR that added it); then phase A continues with feature 001 `boundary-rules`. Open owner decision: remove the old collaborator account `vietnguyen1404` from the repository.
 
 ## Sequencing principle
 
