@@ -17,7 +17,7 @@ The first commit on branch `000-workspace` holds `spec.md`, `plan.md` and this f
   Files: `eslint.config.js`, `package.json`, `docs/HLD.md` (§11 "Lint" row)
 - [x] **T003** Type check. First a temporary file with a type error makes `pnpm typecheck` fail with file and line; then it passes without it; with no source files it passes because `eslint.config.js` (T002) is type-checked too (FR-004, FR-005, FR-006).
   Files: `tsconfig.json`, `package.json`
-- [ ] **T004** Tests. A temporary failing test makes `pnpm test` fail and name the test; with no tests it passes (FR-006, FR-007). A temporary folder `packages/tmp/` with a source and a test file is picked up by all three commands without changes, then deleted (FR-004).
+- [x] **T004** Tests. A temporary failing test makes `pnpm test` fail and name the test; with no tests it passes (FR-006, FR-007). A temporary folder `packages/tmp/` with a source and a test file is picked up by all three commands without changes, then deleted (FR-004).
   Files: `package.json`
 
 ## US3 — CI runs the checks on every change

@@ -9,7 +9,7 @@ The smallest root setup that makes `pnpm lint`, `pnpm typecheck` and `pnpm test`
 | Need | Choice | Why |
 |---|---|---|
 | Package manager | pnpm workspaces (`packages/*`, `apps/*`), version pinned in `packageManager` | HLD §11 |
-| Node.js version | `engines.node: ">=22"` + `engine-strict=true` in `.npmrc`; `.nvmrc` = `22` | pnpm refuses to install on another Node version and prints the required range (FR-002) |
+| Node.js version | `engines.node: ">=22.12.0"` (Vitest 5 minimum; found in T004) + `engine-strict=true` in `.npmrc`; `.nvmrc` = `22` | pnpm refuses to install on another Node version and prints the required range (FR-002) |
 | Type check | One root `tsconfig.json` (strict) that includes every `*.ts`/`*.tsx` in the repo; `typecheck` = `tsc --noEmit` | New packages are covered with no change (FR-004). `ponytail:` one program for the whole repo; move to per-package configs / project references when a package needs different settings (likely `apps/web` in 004) |
 | Lint | ESLint flat config at the root with `@eslint/js` + `typescript-eslint` recommended rules; `lint` = `eslint .` | Covers the whole repo (FR-004). **Not listed in HLD §11 — needs approval, see below** |
 | Tests | Vitest at the root, no config file; `test` = `vitest run --passWithNoTests` | HLD §11. Vitest finds `*.test.ts` anywhere (FR-004); `--passWithNoTests` because no test exists yet (FR-007) |

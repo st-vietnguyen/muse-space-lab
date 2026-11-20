@@ -58,7 +58,7 @@ The owner sees, on every pull request, whether its latest commit passed the chec
 ## Functional requirements
 
 - **FR-001** The repo MUST be a workspace whose members are every folder under `packages/` and `apps/`.
-- **FR-002** Install MUST refuse a Node.js version below 22 and print the required range.
+- **FR-002** Install MUST refuse a Node.js version below 22.12 (the minimum the test runner supports) and print the required range.
 - **FR-003** The package manager version MUST be pinned in the repo, and CI MUST use the same Node.js and package manager versions as local development.
 - **FR-004** `pnpm lint`, `pnpm typecheck` and `pnpm test` MUST run from the repo root and cover all workspace members without per-member changes.
 - **FR-005** Type checking MUST be strict.
