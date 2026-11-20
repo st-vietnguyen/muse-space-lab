@@ -6,3 +6,11 @@ updates:
     schedule:
       interval: weekly
     labels: [chore]
+  # Keeps npm dev dependencies up to date, waiting as long as minimumReleaseAge in pnpm-workspace.yaml.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 21
+    labels: [chore]

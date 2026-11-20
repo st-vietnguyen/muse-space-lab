@@ -16,7 +16,7 @@ pnpm install
 Run from the repo root; they cover every package under `packages/` and `apps/`. CI runs the same three on every push.
 
 ```sh
-pnpm lint        # code style and common mistakes
+pnpm lint        # code style, common mistakes and architecture boundaries (.dependency-cruiser.mjs)
 pnpm typecheck   # strict TypeScript
 pnpm test        # unit tests
 ```

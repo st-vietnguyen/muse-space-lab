@@ -15,7 +15,9 @@ Updated by the agent at each workflow step (CLAUDE.md §2.1).
 - **2026-11-20:** Feature 000: spec, plan and tasks approved; T001–T006 done on branch `000-workspace`, CI green; merged in PR #2 (issue #1 closed).
 - **2026-11-20:** Process updates from the feature 000 retro merged (PR #3).
 - **2026-11-20:** Review pipeline (PR labels, Claude review, dependency audit, secret scan, Dependabot, SHA-pinned actions) merged (PR #4). Dependabot alerts enabled.
-- **2026-11-20:** Next: remove and re-add the `claude-review` label on PR #4 for the first real Claude review (the workflow could not run on the PR that added it); then phase A continues with feature 001 `boundary-rules`. Open owner decision: remove the old collaborator account `vietnguyen1404` from the repository.
+- **2026-11-20:** First real Claude review ran on PR #4 (no findings). Owner decision: keep the collaborator account `vietnguyen1404`.
+- **2026-11-20:** Feature 001 `boundary-rules` is issue #6 (relabeled `ready`); spec, plan and tasks approved (incl. dependency-cruiser); T001–T006 done on branch `001-boundary-rules`, CI green; PR #7: Claude review (2 rounds, no blockers, findings fixed), phase A retro applied in the same PR (owner decision); waiting for owner review.
+- **2026-11-20:** Open: `minimatch` Dependabot alert (moderate, dev only); fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73, which Dependabot proposes once they pass the 21-day release age (about 2026-12-07). Next after merge: phase B, feature 002 `story-schema`.
 
 ## Sequencing principle
 
@@ -25,7 +27,7 @@ The biggest risks are the cinematic experience itself: the 3D↔2D handoff (HLD 
 
 Each feature is one pull request that a reviewer can read in one sitting:
 
-- About **6 tasks or fewer**, about **15 changed files or fewer**, and about **400 hand-written lines or fewer** (lockfiles and generated files excluded).
+- About **6 tasks or fewer**, about **15 changed files or fewer**, and about **400 hand-written lines or fewer** (lockfiles, generated files and test fixtures excluded).
 - A package or app is created by the first feature that needs it; no empty scaffolding "for later".
 - Each feature that adds a user-visible flow adds its Playwright scenario (HLD §13.3), so AC-14 grows with the product instead of arriving at the end.
 - If `plan.md`/`tasks.md` exceed the size above, split the feature (and update this roadmap) before implementing.

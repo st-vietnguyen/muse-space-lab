@@ -53,7 +53,10 @@ jobs:
                  secrets in code or logs, dependency additions, CI workflow changes and their permissions.
                - Look harder when the diff touches apps/api, sign-in, uploads, publishing or .github/.
 
-            Report only problems you have verified by reading the code; say how you verified each.
+            Report problems you have verified by reading the code; say how you verified each.
             Each inline comment starts with a severity: [blocker], [should-fix] or [nit].
+            A suspected problem you cannot verify by reading alone (it needs running code or a missing case)
+            is an inline comment starting with [question]: say what might fail and how to check it.
+            Never put a suspected problem only in the summary.
             Finish with one PR comment: a short summary, counts per severity, and "No blockers" or the list of blockers.
             Never approve, request changes, push, or edit files.
