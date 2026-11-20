@@ -13,9 +13,7 @@ test("every fixture violation is reported under its own rule, and nothing else",
     baseDir: fixtures,
     exclude: { path: "node_modules" },
   });
-  const violations = (output as ICruiseResult).summary.violations
-    .map((v) => `${v.rule.name}: ${v.from}`)
-    .sort();
+  const violations = (output as ICruiseResult).summary.violations.map((v) => `${v.rule.name}: ${v.from}`).sort();
 
   expect(violations).toEqual([
     "db-only-api: apps/web/src/creator-studio/db-outside-api.ts",

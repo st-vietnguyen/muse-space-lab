@@ -441,6 +441,8 @@ Only `apps/api` and the sign-in part of `apps/web` (`apps/web/src/auth/`) may im
 | Tests | Vitest (unit), Playwright (E2E) |
 | Lint | ESLint + typescript-eslint (approved by the owner 2026-11-20, feature 000) |
 | Boundaries | dependency-cruiser (approved by the owner 2026-11-20, feature 001) |
+| Format | Prettier (approved by the owner 2026-11-20) |
+| Git hooks | Lefthook: pre-commit gitleaks + format + lint, pre-push typecheck; gitleaks is a per-machine binary (approved by the owner 2026-11-20) |
 | Monorepo / CI | pnpm workspaces / GitHub Actions |
 
 ---
