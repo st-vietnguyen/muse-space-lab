@@ -44,7 +44,7 @@ Features are grouped into phases. After each phase there is a short retro; lesso
 
 | # | Phase | Feature | Scope | AC | Depends on | Related OQs |
 |---|---|---|---|---|---|---|
-| 000 | A | `workspace` | pnpm workspace, Node ≥ 22, strict TypeScript, ESLint, Vitest, root `lint`/`typecheck`/`test` scripts, GitHub Actions CI running them | — | — | — |
+| 000 | A | `workspace` | pnpm workspace, Node ≥ 24.22.1, strict TypeScript, ESLint, Vitest, root `lint`/`typecheck`/`test` scripts, GitHub Actions CI running them | — | — | — |
 | 001 | A | `boundary-rules` | Choose dependency-cruiser or `eslint-plugin-boundaries` (HLD §10); encode CLAUDE.md §3 rules 3–7 by path; a fixture per rule proves CI fails on a violation | AC-11 (setup) | 000 | — |
 | 002 | B | `story-schema` | Story types + Zod schema with the MVP-0 effects, `narration.durationMs`, `startMs`/total duration, validation and limits, `migrate()`; the reference story (HLD §8.2) as a valid fixture | AC-13 | 001 | OQ-09, OQ-11, OQ-23 |
 | 003 | B | `story-clock` | Pure timeline and master clock in `story-runtime` (HLD §6.5): scene at time, seek, pause/resume, lead-in, re-anchoring, buffering, drift, completion; fake-clock tests with the AC-07 thresholds | AC-07, AC-13 | 002 | — |
