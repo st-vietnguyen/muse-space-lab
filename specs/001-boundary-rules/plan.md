@@ -8,10 +8,10 @@ dependency-cruiser checks import rules by path; one ESLint block catches network
 
 | Need | Choice | Why |
 |---|---|---|
-| Import rules (FR-001 to FR-006) | **dependency-cruiser** `forbidden` rules in `.dependency-cruiser.cjs`, matched by path regex from the repo root | Resolves real files, so relative paths that leave a package are caught; `reachable` rules catch transitive chains (FR-003); `dependencyTypes: core` catches Node.js built-ins; unresolved names (not installed yet) still match. **Not in HLD §11, needs approval, see below** |
+| Import rules (FR-001 to FR-006) | **dependency-cruiser** `forbidden` rules in `.dependency-cruiser.mjs`, matched by path regex from the repo root | Resolves real files, so relative paths that leave a package are caught; `reachable` rules catch transitive chains (FR-003); `dependencyTypes: core` catches Node.js built-ins; unresolved names (not installed yet) still match. **Not in HLD §11, needs approval, see below** |
 | Network globals (FR-004, FR-006) | ESLint `no-restricted-globals` for `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource` in a `files` block for `packages/{story-schema,gallery-layout,domain,story-runtime}/**` | Already installed; imports cannot show a global call |
-| Run everywhere (FR-008) | `lint` = `eslint . && depcruise --config .dependency-cruiser.cjs --output-type err .` | CI already runs `pnpm lint`; running on `.` passes when `apps/`/`packages/` don't exist (tried locally); `err` output prints rule, file and dependency (FR-007) |
-| Proof (FR-009) | `tests/fixtures/boundaries/` mirrors the layout (`packages/story-schema/src/…`, `apps/web/src/visitor-experience/…`), one example file per rule. `tests/boundaries/*.test.ts` runs dependency-cruiser's `cruise()` API and ESLint's `ESLint` API with the fixture tree as the root, and asserts each example is reported under exactly its rule | Test-first; runs in `pnpm test`, so in CI. The fixture tree is excluded from the normal `lint`, `typecheck` and depcruise runs |
+| Run everywhere (FR-008) | `lint` = `eslint . && depcruise --config .dependency-cruiser.mjs --output-type err .` | CI already runs `pnpm lint`; running on `.` passes when `apps/`/`packages/` don't exist (tried locally); `err` output prints rule, file and dependency (FR-007) |
+| Proof (FR-009) | `tests/fixtures/boundaries/` mirrors the layout (`packages/story-schema/src/…`, `apps/web/src/visitor-experience/…`), one example file per rule. `tests/boundaries/*.test.ts` runs dependency-cruiser's `cruise()` API and ESLint's `ESLint` API with the fixture tree as the root, and asserts each example is reported under exactly its rule | Test-first; runs in `pnpm test`, so in CI. The fixture tree is excluded from the normal `typecheck` and depcruise runs |
 
 ### Rules (paths are relative to the repo root)
 
@@ -25,9 +25,9 @@ dependency-cruiser checks import rules by path; one ESLint block catches network
 | `engine-no-business-rules` | `^packages/gallery-engine/` | `packages/domain/` | FR-005 |
 | `runtime-no-engine` | `^packages/story-runtime/` | `packages/gallery-engine/` | FR-006 |
 | `runtime-no-backend` | `^packages/story-runtime/` | `apps/`, `@supabase/`, DB drivers | FR-006 |
-| ESLint `no-restricted-globals` | pure packages + `story-runtime` | `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource` | FR-004, FR-006 |
+| ESLint `no-restricted-globals`, `no-restricted-properties` | pure packages + `story-runtime` | `fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, bare or on `globalThis`/`window`/`self` | FR-004, FR-006 |
 
-Options: `tsPreCompilationDeps: true` (type-only imports count), `doNotFollow: node_modules`, `exclude: node_modules|tests/fixtures/`.
+Options: `tsPreCompilationDeps: true` (type-only imports count), `doNotFollow: node_modules`, `exclude: node_modules|tests/fixtures/`, `enhancedResolveOptions.exportsFields` (imports by workspace package name resolve to `packages/<name>/`; added after review).
 
 ## Dependency to add (dev only)
 
@@ -39,7 +39,8 @@ Options: `tsPreCompilationDeps: true` (type-only imports count), `doNotFollow: n
 
 ## Fixtures and the normal checks
 
-- `tsconfig.json` and `eslint.config.js` exclude `tests/fixtures/` (fixtures import libraries that are not installed). The tests run ESLint with `ignore: false` on the fixtures.
+- `tsconfig.json` excludes `tests/fixtures/` (fixtures import libraries that are not installed). ESLint lints them like any code; its boundary block matches `packages/...` from the repo root only, so it never fires on them.
+- `tests/fixtures/boundaries/node_modules/@musespace/domain` is a committed link (un-ignored in `.gitignore`) that mimics how pnpm links a workspace package.
 - The fixture tree is a copy of the paths, not a real package (no `package.json`), so no empty scaffolding is created.
 
 ## Verifying the failure cases
