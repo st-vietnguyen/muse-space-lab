@@ -16,7 +16,7 @@ Keep the headings below unchanged; they are read by people and by agents.
 
 ## Overview
 
-<!-- 2–3 sentences: what this gives people, who it is for (Visitor, Creator, developer, owner), and why now. -->
+<!-- 3–4 sentences: the problem today and what goes wrong without this feature, what it gives people, who it is for (Visitor, Creator, developer, owner), and why now. -->
 
 ## Prerequisites
 

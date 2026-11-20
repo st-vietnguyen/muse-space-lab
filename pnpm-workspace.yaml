@@ -1,3 +1,6 @@
 packages:
   - packages/*
   - apps/*
+
+# Install only versions published at least 21 days ago (minutes); Dependabot's npm cooldown matches it.
+minimumReleaseAge: 30240
