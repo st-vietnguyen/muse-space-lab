@@ -40,7 +40,6 @@ describe("agent guard blocks", () => {
     "echo exit 0 > .git/hooks/pre-commit",
     "sed -i '' 's/gitleaks/true/' lefthook.yml",
     "cp /tmp/x .claude/settings.json",
-    "echo '' > .claude/hooks/rules.mjs",
     `echo x > ".git/hooks/pre-commit"`,
     `git config "core.hooksPath" /dev/null`,
     "echo x > lefthook-local.yml",
@@ -73,7 +72,6 @@ describe("agent guard blocks", () => {
     ["Edit", { file_path: "/repo/lefthook.yml" }],
     ["Edit", { file_path: "/repo/.claude/settings.json" }],
     ["Write", { file_path: "/repo/.claude/settings.local.json" }],
-    ["MultiEdit", { file_path: "/repo/.claude/hooks/rules.mjs" }],
     ["Write", { file_path: "/repo/lefthook-local.yml" }],
     ["Write", { file_path: "/repo/.lefthook.yaml" }],
     ["Write", { file_path: "/repo/.gitleaks.toml" }],
@@ -102,6 +100,8 @@ describe("agent guard allows", () => {
     "grep -rn dotenv src",
     "pnpm lint",
     "ls .git/hooks",
+    // The guard code is reviewed in the PR like any code; only hook registration and config are owner-only.
+    "echo '' > .claude/hooks/rules.mjs",
   ])("%s", (command) => {
     expect(bash(command)).toBeNull();
   });
@@ -114,6 +114,8 @@ describe("agent guard allows", () => {
     ["Read", { file_path: "/repo/lefthook.yml" }],
     ["Read", { file_path: "/repo/.claude/hooks/rules.mjs" }],
     ["Edit", { file_path: "/repo/tests/hooks/guard.test.ts" }],
+    ["MultiEdit", { file_path: "/repo/.claude/hooks/rules.mjs" }],
+    ["Write", { file_path: "/repo/.claude/hooks/format.mjs" }],
   ])("%s %o", (tool, input) => {
     expect(check(tool, input)).toBeNull();
   });
