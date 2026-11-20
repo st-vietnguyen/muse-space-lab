@@ -18,10 +18,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - id: install
+        run: pnpm install --frozen-lockfile
+      # Each check runs even if an earlier one failed, so one run reports every failing check.
       - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm lint
       - name: Typecheck
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm typecheck
       - name: Test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm test
