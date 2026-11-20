@@ -10,9 +10,10 @@
 
 Updated by the agent at each workflow step (CLAUDE.md §2.1).
 
-- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository `vietnguyen1404/muse-space-lab` created with labels `needs-review` and `ready`. No code yet.
+- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository created (moved to `st-vietnguyen/muse-space-lab` on 2026-11-20) with labels `needs-review` and `ready`. No code yet.
 - **2026-11-20:** Issue template added (`.github/ISSUE_TEMPLATE/feature.md`). Feature 000 `workspace` is issue #1, label `needs-review`. Relabeled `ready`.
-- **2026-11-20:** Feature 000: spec, plan and tasks approved; T001–T006 done on branch `000-workspace`, CI green; PR open for owner review. Next: owner reviews and merges, then phase A continues with feature 001 `boundary-rules`.
+- **2026-11-20:** Feature 000: spec, plan and tasks approved; T001–T006 done on branch `000-workspace`, CI green; merged in PR #2 (issue #1 closed).
+- **2026-11-20:** Process updates from the feature 000 retro in PR #3. Next: owner merges PR #3, then phase A continues with feature 001 `boundary-rules` under the updated workflow.
 
 ## Sequencing principle
 
