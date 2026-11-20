@@ -1,0 +1,25 @@
+# Git hooks, installed by `pnpm install` (the "prepare" script). CI runs the same checks on every push,
+# so a skipped hook is still caught there, but only after the code (and any secret) is on GitHub.
+pre-commit:
+  piped: true # stop at the first failing job; secrets run first
+  jobs:
+    # First, before anything is re-staged. gitleaks is a system binary, not an npm package (see README).
+    - name: secrets
+      run: |
+        command -v gitleaks >/dev/null || { echo "gitleaks is not installed: brew install gitleaks (see README)"; exit 1; }
+        gitleaks git --pre-commit --staged --redact --no-banner
+    - name: format
+      glob: "*.{js,mjs,cjs,ts,tsx,json,yml,yaml,css,html}"
+      run: node_modules/.bin/prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+    - name: lint
+      glob: "*.{js,mjs,cjs,ts,tsx}"
+      run: node_modules/.bin/eslint --max-warnings 0 --no-warn-ignored {staged_files}
+    - name: boundaries
+      glob: "*.{js,mjs,cjs,ts,tsx}"
+      run: node_modules/.bin/depcruise --config .dependency-cruiser.mjs --output-type err .
+
+pre-push:
+  jobs:
+    - name: typecheck
+      run: pnpm typecheck

@@ -1,0 +1,3 @@
+# Docs keep their hand-made tables; the lockfile is generated.
+*.md
+pnpm-lock.yaml
