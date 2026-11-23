@@ -21,7 +21,7 @@
 
 #### Known limits
 
-> Accepted limits the reviewer should not report again, each with its reason, or "None".
+> Accepted limits, each with its reason, or "None". The Claude review skips nits of these kinds but still reports a `[blocker]` or `[should-fix]` under them.
 
 #### Screenshots
 
