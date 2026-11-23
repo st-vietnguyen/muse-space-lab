@@ -6,7 +6,7 @@ The first commit on branch `002-story-schema` holds `spec.md`, `plan.md`, this f
 
 ## US1 — Describe a story
 
-- [ ] **T001** Create `packages/story-schema` with `zod`; the version 1 format with the three effects; `parseStory` (schema only); `sceneStartsMs`, `totalDurationMs`.
+- [x] **T001** Create `packages/story-schema` with `zod`; the version 1 format with the three effects; `parseStory` (schema only); `sceneStartsMs`, `totalDurationMs`.
   Tests (`tests/story-schema/format.test.ts`): a story using all three effects, with captions, is accepted and returned equal to the input; the same with narration and a transcript; scenes of 15/25/25 s start at 0/15 000/40 000 ms and total 65 000 ms; a single scene starts at 0; a stored `startMs` on a scene or a `totalDurationMs` on the story is rejected.
   Files: `packages/story-schema/package.json`, `packages/story-schema/src/story.ts`, `pnpm-lock.yaml`, `tests/story-schema/format.test.ts`
   FR-001–FR-004, FR-006, FR-008, FR-010 · AC-13

@@ -1,0 +1,11 @@
+{
+  "name": "@musespace/story-schema",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/story.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}
