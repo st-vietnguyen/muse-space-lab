@@ -53,6 +53,19 @@ const CHANGE_HOOKS = [
   ],
 ];
 
+// Only the owner merges and approves issues (CLAUDE.md §2.1). Matched on the raw command: refs and labels are often quoted.
+const MERGE = [
+  /\bgh\s+pr\s+merge\b/,
+  /\bgh\s+api\b[^;&|]*\/merge\b/,
+  new RegExp(git("push") + String.raw`[^;&|]*(\s|:|refs/heads/)main(?![\w./-])`),
+];
+const MERGE_REASON = "Blocked: only the owner merges PRs and pushes to main (CLAUDE.md §2.1).";
+const READY_LABEL = [
+  /--add-label[=\s]+["']?([^\s"']*,)?ready(?![\w-])/,
+  /\bgh\s+api\b[^;&|]*labels[^;&|]*\bready(?![\w-])/,
+];
+const READY_REASON = "Blocked: the owner approves an issue by adding the label ready (CLAUDE.md §2.1).";
+
 /**
  * `rm` with both a recursive and a force flag, in any order or position (`rm -rf x`, `rm -r x -f`, `rm x -rf`).
  * @param {string} command
@@ -93,6 +106,8 @@ export function check(toolName, input) {
     for (const [pattern, name] of CHANGE_HOOKS) {
       if (pattern.test(command)) return `Blocked: skipping or changing git hooks (${name}) is not allowed.`;
     }
+    if (MERGE.some((pattern) => pattern.test(command))) return MERGE_REASON;
+    if (READY_LABEL.some((pattern) => pattern.test(command))) return READY_REASON;
     return touchesEnvFile(command) ? ENV_REASON : null;
   }
   // File tools. A Grep `pattern` is a regex over file contents, not a path, so it is not checked.

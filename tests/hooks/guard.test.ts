@@ -48,6 +48,30 @@ describe("agent guard blocks", () => {
     expect(bash(command)).toMatch(/git hooks/);
   });
 
+  test.each([
+    "gh pr merge 12 --merge",
+    "gh pr merge --squash --auto",
+    "cd x && gh pr merge",
+    "gh api -X PUT repos/o/r/pulls/12/merge",
+    "git push origin main",
+    "git push origin HEAD:main",
+    "git push -u origin feature:main",
+    "git -C . push origin main",
+  ])("merging or pushing to main: %s", (command) => {
+    expect(bash(command)).toMatch(/owner merges/);
+  });
+
+  test.each([
+    "gh issue edit 6 --add-label ready",
+    "gh issue edit 6 --remove-label needs-review --add-label ready",
+    'gh issue edit 6 --add-label "ready"',
+    "gh issue edit 6 --add-label=ready",
+    "gh issue edit 6 --add-label bug,ready",
+    "gh api repos/o/r/issues/6/labels -f 'labels[]=ready'",
+  ])("adding the ready label: %s", (command) => {
+    expect(bash(command)).toMatch(/owner approves/);
+  });
+
   test.each(["cat .env", "less .env.local", "grep KEY apps/api/.env", "cp .env.production /tmp/x", "source ./.env"])(
     ".env in a command: %s",
     (command) => {
@@ -100,6 +124,15 @@ describe("agent guard allows", () => {
     "grep -rn dotenv src",
     "pnpm lint",
     "ls .git/hooks",
+    "gh pr ready 12",
+    "gh pr view 12 --json mergeable",
+    "gh pr edit 12 --add-label claude-review",
+    "gh issue edit 6 --add-label needs-review",
+    "gh issue edit 6 --remove-label ready",
+    "git push -u origin 002-story-schema",
+    "git push origin main-docs",
+    "git switch main && git pull",
+    "git merge main",
     // The guard code is reviewed in the PR like any code; only hook registration and config are owner-only.
     "echo '' > .claude/hooks/rules.mjs",
   ])("%s", (command) => {
