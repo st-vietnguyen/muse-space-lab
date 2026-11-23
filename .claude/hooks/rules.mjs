@@ -16,10 +16,13 @@ const HOOK_REASON =
   "Blocked: git hooks, Lefthook and gitleaks config and Claude Code settings are changed only by the owner.";
 const WRITE_TOOLS = ["Edit", "MultiEdit", "Write", "NotebookEdit"];
 
+// Options between the words of a command, each with an optional value (`git -C . push`, `gh -R o/r pr merge`).
+const FLAGS = String.raw`(\s+-\S+(\s+[^\s-]\S*)?)*`;
+
 // `git` plus any global options before the subcommand (`git -C . push`, `git --no-pager clean`).
 // The flag patterns after it use `[^;&|]*` so they stay inside one command (`git push x && rm -f a` is fine).
 /** @param {string} subcommand */
-const git = (subcommand) => String.raw`\bgit(\s+-\S+(\s+[^\s-]\S*)?)*\s+${subcommand}\b`;
+const git = (subcommand) => String.raw`\bgit${FLAGS}\s+${subcommand}\b`;
 
 /** @type {[RegExp, string][]} */
 const DESTRUCTIVE = [
@@ -58,7 +61,7 @@ const CHANGE_HOOKS = [
 // double quotes can run `$(...)`. The others are matched on the raw command, because refs, queries and labels are often
 // quoted; `[^;&|\n]` keeps them in one command (line continuations are joined first).
 // ponytail: a plain `git push` while on main is not caught (no refspec to read); branch protection would catch it.
-const PR_MERGE = /\bgh\s+pr\s+merge\b/;
+const PR_MERGE = new RegExp(String.raw`\bgh${FLAGS}\s+pr${FLAGS}\s+merge\b`);
 const MERGE = [
   /\bgh\s+api\b[^;&|\n]*(\/merges?\b|mergePullRequest|enablePullRequestAutoMerge|git\/refs\/heads\/main\b)/,
   new RegExp(git("push") + String.raw`[^;&|\n]*(\s--all\b|(\s|:|heads/)["']?main["']?(?![\w./-]))`),
@@ -102,7 +105,12 @@ export function check(toolName, input) {
     const command = String(input.command ?? "").replace(/\\\n/g, " ");
     // Flags inside quoted text (a commit message) are not flags.
     const unquoted = command.replace(/'[^']*'|"[^"]*"/g, "''");
-    const singleUnquoted = command.replace(/'[^']*'/g, "''");
+    // Two ways to drop single-quoted text; a merge found by either is blocked. The first skips `'` inside double
+    // quotes (`"don't"`), the second covers a `"` the shell does not treat as a quote (`\"`, comments, heredocs).
+    const singleUnquoted = [
+      command.replace(/"[^"]*"|'[^']*'/g, (m) => (m[0] === "'" ? "''" : m)),
+      command.replace(/'[^']*'/g, "''"),
+    ];
     if (isRmRf(unquoted)) return "Blocked: destructive command (rm -rf). Ask the owner to run it.";
     for (const [pattern, name] of DESTRUCTIVE) {
       if (pattern.test(unquoted)) return `Blocked: destructive command (${name}). Ask the owner to run it.`;
@@ -113,7 +121,8 @@ export function check(toolName, input) {
     for (const [pattern, name] of CHANGE_HOOKS) {
       if (pattern.test(command)) return `Blocked: skipping or changing git hooks (${name}) is not allowed.`;
     }
-    if (PR_MERGE.test(singleUnquoted) || MERGE.some((pattern) => pattern.test(command))) return MERGE_REASON;
+    if (singleUnquoted.some((text) => PR_MERGE.test(text)) || MERGE.some((pattern) => pattern.test(command)))
+      return MERGE_REASON;
     if (READY_LABEL.some((pattern) => pattern.test(command))) return READY_REASON;
     return touchesEnvFile(command) ? ENV_REASON : null;
   }
