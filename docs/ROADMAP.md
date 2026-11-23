@@ -10,9 +10,9 @@
 
 Rewritten by the agent at each workflow step (CLAUDE.md §2.1); history is in git and the PRs.
 
-- **Now (2026-11-23):** Phase A done; workflow for phase B merged (PR #12; PR #13: the Claude review counts rounds from its run history and reviews round 2 in the context of the whole PR). PR #14 (`process-plan-mode`): proposals (a feature's spec, plan and tasks; a process change) are made in plan mode, and nothing changes in the repo until the owner approves (owner decision 2026-11-23).
-- **Next:** phase B, feature 002 `story-schema` (issue to draft), the first feature started in plan mode; its PR is the first real run of the new review rounds.
-- **Waiting on owner:** merge of PR #14 (Claude review round 1: no findings). `minimatch` Dependabot alert (moderate, dev only): fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73 once Dependabot proposes them (about 2026-12-07).
+- **Now (2026-11-23):** feature 002 `story-schema` (issue #15): spec, plan and tasks approved; branch `002-story-schema`; next task T001.
+- **Next:** feature 003 `story-clock` (issue to draft).
+- **Waiting on owner:** review of each 002 task (tests, then code). Decision on the boundary finding in `specs/002-story-schema/plan.md` (imports of installed libraries are not checked; a separate `bug` PR is proposed). `minimatch` Dependabot alert (moderate, dev only): fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73 once Dependabot proposes them (about 2026-12-07).
 - **Process backlog:** a bot account or GitHub App for the agent (before real projects); automate parts of the owner's step reviews (owner decision 2026-11-23: manual for now); count the real findings the Claude review on CI still finds after `self-review` (PR descriptions) and decide at the phase B retro whether CI keeps 2 rounds, 1 round or security only; `claude-review.yml` takes its criteria from the `self-review` skill so both check the same things (read from `main`, never the PR's copy, so a PR cannot weaken its own review).
 
 ## Sequencing principle
