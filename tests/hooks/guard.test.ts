@@ -57,6 +57,21 @@ describe("agent guard blocks", () => {
     "git push origin HEAD:main",
     "git push -u origin feature:main",
     "git -C . push origin main",
+    'git push origin "main"',
+    "git push origin feature:'main'",
+    "git push origin HEAD:refs/heads/main",
+    "git push --all origin",
+    "git push origin HEAD:heads/main",
+    "gh api graphql -f query='mutation { enablePullRequestAutoMerge(input: {pullRequestId: \"x\"}) { clientMutationId } }'",
+    "gh api -X PATCH repos/o/r/git/refs/heads/main -f sha=abc",
+    'bash -c "gh pr merge 12 --merge"',
+    'echo "$(gh pr merge 12 --merge)"',
+    'out="$(gh pr merge 12 --squash)"',
+    "git push \\\n  origin main",
+    "git push origin \\\n  main",
+    "gh api \\\n  -X PUT repos/o/r/pulls/1/merge",
+    "gh api -X POST repos/o/r/merges -f base=main -f head=x",
+    "gh api graphql -f query='mutation { mergePullRequest(input: {pullRequestId: \"x\"}) { clientMutationId } }'",
   ])("merging or pushing to main: %s", (command) => {
     expect(bash(command)).toMatch(/owner merges/);
   });
@@ -68,6 +83,14 @@ describe("agent guard blocks", () => {
     "gh issue edit 6 --add-label=ready",
     "gh issue edit 6 --add-label bug,ready",
     "gh api repos/o/r/issues/6/labels -f 'labels[]=ready'",
+    'gh issue edit 6 --add-label "bug, ready"',
+    "gh issue edit 6 --add-label Ready",
+    "gh issue create --title x --label ready",
+    "gh issue create -t x -l ready",
+    "gh issue create --title x --label=bug,ready",
+    "gh issue edit 5 \\\n  --add-label ready",
+    "gh issue --repo o/r edit 5 --add-label ready",
+    "gh -R o/r issue edit 5 --add-label ready",
   ])("adding the ready label: %s", (command) => {
     expect(bash(command)).toMatch(/owner approves/);
   });
@@ -133,6 +156,12 @@ describe("agent guard allows", () => {
     "git push origin main-docs",
     "git switch main && git pull",
     "git merge main",
+    'git push origin "main-docs"',
+    "git commit -m 'T001: block gh pr merge in the guard'",
+    "gh issue create --title x --label needs-review",
+    "gh issue list -l ready",
+    "ls -l ready.txt",
+    "git push -u origin 002-x\ngit switch main",
     // The guard code is reviewed in the PR like any code; only hook registration and config are owner-only.
     "echo '' > .claude/hooks/rules.mjs",
   ])("%s", (command) => {

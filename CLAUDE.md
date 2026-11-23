@@ -27,9 +27,9 @@ Human in the loop: the agent proposes, the owner approves every step before it i
 - **Plan**: use only technologies listed in HLD §11. Adding a library requires a justification in the plan and approval. Check every choice against reality before submitting the plan: current versions (the newest allowed by `minimumReleaseAge` in `pnpm-workspace.yaml`), peer dependencies, required Node.js version; for tooling, a quick local trial.
 - **Tasks**: grouped by user story; each task names its tests; `[P]` marks parallel tasks; list affected files; list related `AC-xx` codes.
 - **Implement**: one task at a time (skill `do-task`); the owner reviews each step locally before anything is committed:
-  1. Write only the task's tests and run them; stop. The owner reviews the tests.
-  2. Write the code until `pnpm lint`, `pnpm typecheck` and `pnpm test` pass; stop. The owner reviews the code.
-  3. Commit tests and code together, push, mark the task `[x]`.
+  1. Write only the task's tests and run them; for security-sensitive logic (guards, validation, permissions) they cover ways around the rule, not only the normal case. Stop. The owner reviews the tests.
+  2. Write the code until `pnpm lint`, `pnpm typecheck` and `pnpm test` pass. Self-review the uncommitted diff (skill `self-review`: correctness, code quality, and security for the security-relevant changes it lists) and fix what holds up. Stop. The owner reviews the code and the self-review result.
+  3. Mark the task `[x]` and commit it together with its tests and code; push.
   A task with nothing to test (config, docs) starts at step 2. Fixes from a review round follow steps 2–3.
   Deviations from the approved plan come in two kinds:
   - Other library, version, task order or scope: stop and ask before doing it.
@@ -44,13 +44,13 @@ Each feature in `docs/ROADMAP.md` is one GitHub issue and one PR, within the siz
 1. **Issue.** The agent drafts it from `.github/ISSUE_TEMPLATE/feature.md` with label `needs-review`; the owner reviews it and relabels it `ready` on GitHub. The issue is for people: plain language, no internal doc names, sections, libraries or tables.
 2. **Spec, plan, tasks** (skill `start-feature`). From the `ready` issue (owner-approved, so it counts as a direct request) the agent writes `specs/00X-<name>/spec.md`, `plan.md` and `tasks.md` locally. `spec.md` follows `specs/_template/spec.md` and is for developers and agents: it does not copy the issue but turns it into user scenarios, numbered functional requirements, edge cases, success criteria, constraints and assumptions, with references (ROADMAP, HLD/vision sections, `AC-xx`, `OQ-xx`) and a mapping back to the issue's criteria. The owner approves in chat; then the agent creates branch `00X-<name>`, whose first commit is spec + plan + tasks.
 3. **Tasks** per §2 Implement (skill `do-task`).
-4. **PR** (skill `open-pr`). Self-review first: `/code-review` on the diff, plus `/security-review` when it touches hooks, CI, auth, uploads or publishing. For security-sensitive logic (guards, validation, permissions), tests cover ways around the rule, not only the normal case. Draft PR from `.github/pull_request_template.md`, with `--assignee @me` and one type label (`feature`, `process`, `bug`, `chore`). CI green (lint, typecheck, test, dependency audit, secret scan) → mark it ready and add the label `claude-review`.
+4. **PR** (skill `open-pr`). Re-read the whole diff against the spec. Draft PR from `.github/pull_request_template.md`, with `--assignee @me` and one type label (`feature`, `process`, `bug`, `chore`). CI green (lint, typecheck, test, dependency audit, secret scan) → mark it ready and add the label `claude-review`.
 5. **Review rounds** (skill `review-round`). Every comment is fixed or answered with the reason; every `[question]` is checked (with a small trial if needed) and answered with the result, and a confirmed one is fixed like a `[blocker]`. At most **2 Claude review rounds**: round 1 reviews the whole PR, round 2 only the commits since round 1; from round 2 only `[blocker]` and `[should-fix]` must be fixed, and a `[nit]` goes into `notes.md` (or the PR description when there is no spec folder). The agent adds the label `needs-owner`, stops re-adding `claude-review` and posts **one summary comment** (each open issue with a proposal: fix, known limit, or new issue) when:
    - a `[blocker]`, `[should-fix]` or confirmed `[question]` is still open after round 2;
    - a finding is beyond the agent (needs permissions, a redesign, an owner-only file, or is out of scope);
    - at any round, the agent is unsure about a big issue (several options, a trade-off, or a change to scope or plan).
    The owner decides on the PR (merge, one more round, or split); the agent acts on it and removes `needs-owner`. No `[blocker]` may be open at merge.
-6. **Merge.** Only the owner merges ("Create a merge commit"). The agent never merges a PR, pushes to `main` or adds the label `ready`; the guard blocks all three.
+6. **Merge.** Only the owner merges ("Create a merge commit"). The agent never merges a PR, pushes to `main` or adds the label `ready`. The guard blocks the usual commands for all three; it is a safety net, not branch protection (which this GitHub plan does not offer).
 7. **Retro** at the end of each roadmap phase; lessons go into this file, skills or CI.
 
 "Current status" in `docs/ROADMAP.md` is one block (Now, Next, Waiting on owner, Process backlog) that the agent rewrites, inside the feature branch, in the commit of the step it describes; no PR only for status. It never grows into a log: history is in git and the PRs.
@@ -59,7 +59,7 @@ The workflow, templates and this file do not change while a feature is in progre
 
 ### 2.2. Other flows
 
-- **Process or tooling change** (not a roadmap feature): no issue or spec. The agent proposes the problem, the change and how it is checked; the owner approves in chat; the step reviews of §2 apply. Branch `process-<topic>`, label `process`; the PR description holds the proposal. Never mixed into a feature PR.
+- **Process or tooling change** (not a roadmap feature): no issue or spec. The agent proposes the problem, the change and how it is checked; the owner approves in chat; the step reviews of §2 apply. Branch `process-<topic>`, label `process`; the PR description holds the proposal and any deviation from it. Never mixed into a feature PR.
 - **PR that depends on another**: the first line of the description is "Merge after #N". Once #N is merged, the agent merges `main` into the branch and waits for CI.
 - **Dependabot PR**: label `chore`. For a major version the agent reads the changelog and comments the breaking changes that touch this repo. CI green; the owner merges.
 - **CI red on `main`**: stop other work. A `bug` PR fixes it without a spec; one Claude review round.
@@ -108,6 +108,6 @@ Rules 3–7 are checked automatically in CI; if CI reports a violation, fix the 
 
 ## 7. Git
 
-- One branch per feature, `00X-<name>`; small commits, one task per commit, message contains the task ID (e.g. `T003: ...`).
+- One branch per feature, `00X-<name>`; small commits, one task per commit, message contains the task ID (e.g. `T003: ...`), or starts with `Review fix:` for a fix from a review round.
 - Stage files by name, never `git add -A` or `git add .`; check `git status` before every commit.
 - PRs include `Closes #N` (if there is an issue) and list the `AC-xx` codes met. The project owner merges.

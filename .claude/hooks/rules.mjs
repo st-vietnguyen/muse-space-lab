@@ -53,16 +53,21 @@ const CHANGE_HOOKS = [
   ],
 ];
 
-// Only the owner merges and approves issues (CLAUDE.md §2.1). Matched on the raw command: refs and labels are often quoted.
+// Only the owner merges and approves issues (CLAUDE.md §2.1).
+// `gh pr merge` is matched with single-quoted text removed (it never runs), so `-m '... gh pr merge ...'` is fine;
+// double quotes can run `$(...)`. The others are matched on the raw command, because refs, queries and labels are often
+// quoted; `[^;&|\n]` keeps them in one command (line continuations are joined first).
+// ponytail: a plain `git push` while on main is not caught (no refspec to read); branch protection would catch it.
+const PR_MERGE = /\bgh\s+pr\s+merge\b/;
 const MERGE = [
-  /\bgh\s+pr\s+merge\b/,
-  /\bgh\s+api\b[^;&|]*\/merge\b/,
-  new RegExp(git("push") + String.raw`[^;&|]*(\s|:|refs/heads/)main(?![\w./-])`),
+  /\bgh\s+api\b[^;&|\n]*(\/merges?\b|mergePullRequest|enablePullRequestAutoMerge|git\/refs\/heads\/main\b)/,
+  new RegExp(git("push") + String.raw`[^;&|\n]*(\s--all\b|(\s|:|heads/)["']?main["']?(?![\w./-]))`),
 ];
 const MERGE_REASON = "Blocked: only the owner merges PRs and pushes to main (CLAUDE.md §2.1).";
+// GitHub matches label names case-insensitively; a label list may have spaces after commas.
 const READY_LABEL = [
-  /--add-label[=\s]+["']?([^\s"']*,)?ready(?![\w-])/,
-  /\bgh\s+api\b[^;&|]*labels[^;&|]*\bready(?![\w-])/,
+  /\bgh\s[^;&|\n]*\b(issue|pr)\s[^;&|\n]*\b(create|edit)\b[^;&|\n]*(--add-label|--label|\s-l)[=\s]+["']?([^\s"',]*,\s*)*ready(?![\w-])/i,
+  /\bgh\s+api\b[^;&|\n]*labels[^;&|\n]*\bready(?![\w-])/i,
 ];
 const READY_REASON = "Blocked: the owner approves an issue by adding the label ready (CLAUDE.md §2.1).";
 
@@ -93,9 +98,11 @@ function touchesEnvFile(text) {
  */
 export function check(toolName, input) {
   if (toolName === "Bash") {
-    const command = String(input.command ?? "");
+    // A backslash-newline continues the same command.
+    const command = String(input.command ?? "").replace(/\\\n/g, " ");
     // Flags inside quoted text (a commit message) are not flags.
     const unquoted = command.replace(/'[^']*'|"[^"]*"/g, "''");
+    const singleUnquoted = command.replace(/'[^']*'/g, "''");
     if (isRmRf(unquoted)) return "Blocked: destructive command (rm -rf). Ask the owner to run it.";
     for (const [pattern, name] of DESTRUCTIVE) {
       if (pattern.test(unquoted)) return `Blocked: destructive command (${name}). Ask the owner to run it.`;
@@ -106,7 +113,7 @@ export function check(toolName, input) {
     for (const [pattern, name] of CHANGE_HOOKS) {
       if (pattern.test(command)) return `Blocked: skipping or changing git hooks (${name}) is not allowed.`;
     }
-    if (MERGE.some((pattern) => pattern.test(command))) return MERGE_REASON;
+    if (PR_MERGE.test(singleUnquoted) || MERGE.some((pattern) => pattern.test(command))) return MERGE_REASON;
     if (READY_LABEL.some((pattern) => pattern.test(command))) return READY_REASON;
     return touchesEnvFile(command) ? ENV_REASON : null;
   }

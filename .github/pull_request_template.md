@@ -16,7 +16,8 @@
 
 #### Self-review
 
-> `/code-review` (plus `/security-review` when the diff touches hooks, CI, auth, uploads or publishing): what it found and what was fixed.
+> What the tasks' self-review (skill `self-review`) found, what was fixed, and what was not and why.
+> After each Claude review round on CI: how many real findings it still found (`[blocker]`/`[should-fix]`/confirmed `[question]`).
 
 #### Known limits
 

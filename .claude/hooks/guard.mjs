@@ -1,4 +1,5 @@
-// PreToolUse hook: blocks destructive commands, skipping git hooks, and access to .env files.
+// PreToolUse hook: blocks destructive commands, skipping git hooks, merging, pushing to main, adding the ready
+// label, and access to .env files (rules in rules.mjs).
 // Exit code 2 blocks the tool call and shows the reason to the agent. Any other failure would let the
 // call run, so every error (bad input, a broken rules.mjs) blocks too: the guard fails closed.
 let reason;

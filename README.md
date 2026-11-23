@@ -6,6 +6,12 @@ Online art exhibitions where each artwork tells its story in a cinematic way. Pr
 
 Requires the Node.js version in `.nvmrc` (or newer), Corepack (ships with Node.js) and [gitleaks](https://github.com/gitleaks/gitleaks).
 
+The AI-agent workflow (`CLAUDE.md`) also needs:
+
+- [Claude Code](https://claude.com/claude-code): it runs the agent hooks in `.claude/settings.json` and the workflow skills in `.claude/skills/`. Other agents only read `CLAUDE.md` and the skill files as plain instructions; the hooks do not run for them.
+- [GitHub CLI](https://cli.github.com/) (`gh`), signed in with access to the repository.
+- For the Claude review on pull requests: the Claude GitHub App installed on the repository and the repository secret `CLAUDE_CODE_OAUTH_TOKEN`.
+
 ```sh
 brew install gitleaks   # once per machine; the pre-commit hook needs it
 corepack enable         # once per machine; provides the pnpm version pinned in package.json
