@@ -12,6 +12,10 @@
 - **T003 (agent decision):** `migrate` takes an object; `parseStory` sends input that is not an object straight to the schema, which reports `format`. `migrate` returns errors in the same shape as `parseStory`. `STEPS` is not exported until a caller needs it.
 - **T003 (note for the first real step):** `migrate` copies the story with `structuredClone` only when a step runs (never today). From then on, an in-process caller passing a story with a function in it gets a thrown `DataCloneError`; stories parsed from JSON cannot contain one.
 
+## Outside this feature
+
+- **Boundary rules miss installed libraries** (found while planning, see `plan.md`): `.dependency-cruiser.mjs` has `node_modules` in `exclude`, so an import of an installed library from a pure package is never checked against CLAUDE.md §3 rules 3–7. Trial: `packages/story-schema` importing the installed `dependency-cruiser` and `vitest` passed; with `node_modules` moved from `exclude` to `doNotFollow` only, both were reported under `pure-allowlist` and `zod` stayed allowed. Not fixed here (CLAUDE.md §5); proposed to the owner as a separate `bug` PR.
+
 ## Process
 
 - **2026-11-23:** the owner adopted "test names start with `should`" during this feature (override of the CLAUDE.md §2.1 freeze; process PR #31). T001's tests use it.

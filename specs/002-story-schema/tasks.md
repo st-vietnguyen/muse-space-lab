@@ -34,5 +34,5 @@ The first commit on branch `002-story-schema` holds `spec.md`, `plan.md`, this f
 
 ## Docs
 
-- [ ] **T005** HLD §8.2 and §10; `notes.md` (boundary finding, deviations); "Current status".
+- [x] **T005** HLD §8.2 and §10; `notes.md` (boundary finding, deviations); "Current status".
   Files: `docs/HLD.md`, `specs/002-story-schema/notes.md`, `docs/ROADMAP.md`

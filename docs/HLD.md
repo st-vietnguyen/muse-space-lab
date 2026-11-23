@@ -253,6 +253,9 @@ CinematicStory.definition
 - A story with narration must have a transcript.
 - Every `assetId` must point to a `ready` MediaAsset owned by the same creator — checked in `domain` (needs media data), not in `story-schema`. `domain` also checks that `narration.durationMs` matches the asset's measured duration.
 - Overlay images exist only as Memory Reveal parameters; there is no scene-level overlay field (OQ-09).
+- Effect `params` (MVP-0): Cinematic Focus `{ region: { x, y, width, height } }` relative to the artwork (0–1, width and height > 0, inside the artwork, with a 1e-9 tolerance for rounding); Memory Reveal `{ assetId, placement: "over" | "beside" }`; Final Reveal `{}`.
+- Times (`durationMs`, `startAtMs`) are whole milliseconds. Scene ids are unique within a story. Every object is strict: a field the format does not define is rejected, never dropped. Limits: 1–12 scenes, total ≤ 5 min (§9.2).
+- `parseStory(input)` in `story-schema` is the single entry point: it runs `migrate` (§8.5), then validates, and returns the story unchanged or errors that each name a rule, a path and the scene (feature 002).
 
 **Example** — *The Chair by the Window* (reference story, AC-15; MVP-0 effects only): Cinematic Focus 15s → Memory Reveal 25s → Final Reveal 25s = 65s; narration `startAtMs = 5000`, 55s long → ends at 60s ≤ 65s, valid. Durations are samples, not hard limits.
 
@@ -382,7 +385,7 @@ musespace/
 ├── packages/         # domain, contracts, gallery-engine, gallery-layout, story-runtime, story-schema
 ├── supabase/         # config.toml
 ├── scripts/          # seed, snapshot resync
-├── tests/            # fixtures/, integration/, e2e/
+├── tests/            # <package>/ (unit tests per package), fixtures/ (incl. stories/), boundaries/, integration/, e2e/
 ├── specs/            # 00X-<name>/{spec,plan,tasks,notes}.md
 ├── docs/             # 00-vision, HLD, ROADMAP, OPEN-QUESTIONS, architecture/, adr/
 ├── .devcontainer/ .github/workflows/ .claude/
