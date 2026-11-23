@@ -27,7 +27,7 @@ The first commit on branch `002-story-schema` holds `spec.md`, `plan.md`, this f
 
 ## US4 — Have the reference story
 
-- [ ] **T004** [P] (with T003, after T002) The reference story as data. No new code: the test and the fixture are reviewed at step 1; step 2 is the checks and the self-review.
+- [x] **T004** [P] (with T003, after T002) The reference story as data. No new code: the test and the fixture are reviewed at step 1; step 2 is the checks and the self-review.
   Tests (`tests/story-schema/reference-story.test.ts`): `parseStory` accepts it; effects in order Cinematic Focus, Memory Reveal, Final Reveal, lasting 15/25/25 s; total 65 s; narration from 5 s to 60 s; transcript present.
   Files: `tests/fixtures/stories/the-chair-by-the-window.json`, `tests/story-schema/reference-story.test.ts`
   FR-015 · AC-13, AC-15 (data only)

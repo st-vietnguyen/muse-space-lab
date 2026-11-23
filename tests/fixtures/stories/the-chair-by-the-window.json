@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "narration": { "assetId": "reference-narration", "startAtMs": 5000, "durationMs": 55000 },
+  "transcript": "Every morning, before the house woke up, she sat in this chair by the window. The light came in low and gold, and it found the same places each day: the worn arm of the chair, the edge of the table, the letters she kept in a wooden box. She read them slowly, one at a time, as if for the first time. Some were from her sister, who lived by the sea. She never said which ones she loved most. When she painted this room, years later, she left the chair empty. People asked her why. She said the chair was not empty at all. It was full of every morning she had spent there, and the light still knew where to find her.",
+  "scenes": [
+    {
+      "id": "light-on-the-chair",
+      "durationMs": 15000,
+      "caption": "Morning light on the chair by the window.",
+      "effect": {
+        "type": "cinematic-focus",
+        "params": { "region": { "x": 0.38, "y": 0.42, "width": 0.3, "height": 0.4 } }
+      }
+    },
+    {
+      "id": "her-reading-letters",
+      "durationMs": 25000,
+      "caption": "She read her letters here every morning.",
+      "effect": {
+        "type": "memory-reveal",
+        "params": { "assetId": "reference-archival-photo", "placement": "beside" }
+      }
+    },
+    {
+      "id": "the-whole-room",
+      "durationMs": 25000,
+      "caption": "The whole room, and the empty chair.",
+      "effect": { "type": "final-reveal", "params": {} }
+    }
+  ]
+}
