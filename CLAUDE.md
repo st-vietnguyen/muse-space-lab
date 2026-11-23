@@ -86,6 +86,7 @@ Rules 3–7 are checked automatically in CI; if CI reports a violation, fix the 
 ## 4. Quality
 
 - Test-first for all logic in `domain`, `story-schema`, `gallery-layout` and the pure timeline part of `story-runtime`.
+- Test names start with `should` and state the expected result, e.g. `test("should reject a stored start time on a scene")`; `describe` names the unit or situation under test. Applies to tests written from 2026-11-23; older tests are not renamed.
 - Never delete, skip or loosen tests to make them pass. If a test is wrong, explain why and wait for approval.
 - Before reporting a task as done: `pnpm lint`, `pnpm typecheck`, `pnpm test` all pass.
 - Use `pnpm` for every package command (`pnpm view`, `pnpm exec`, `pnpm dlx`), never `npm` or `npx`.
