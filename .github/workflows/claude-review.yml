@@ -1,8 +1,8 @@
 name: Claude review
 
 # Runs when the label "claude-review" is added to a pull request. Remove and re-add it to review again.
-# Round 1 reviews the whole PR; later rounds review only the commits since the last review (CLAUDE.md §2.1:
-# at most 2 rounds, then the agent hands over with the label "needs-owner").
+# Round 1 reviews the whole PR; later rounds review the commits since the last review in the context of the whole PR
+# (CLAUDE.md §2.1: at most 2 rounds, then the agent hands over with the label "needs-owner").
 # Security: pull_request (never pull_request_target); this job never installs or runs code from the PR;
 # Claude gets read-only file tools plus PR comment tools, nothing else.
 on:
@@ -10,6 +10,7 @@ on:
     types: [labeled]
 
 permissions:
+  actions: read # earlier runs of this workflow give the round number and the last reviewed commit
   contents: read
   pull-requests: write
   id-token: write # used by the action to obtain its GitHub App token
@@ -29,7 +30,9 @@ jobs:
           fetch-depth: 0 # later rounds diff against the commit reviewed last time
           persist-credentials: false
       # Writes .review-context/ for the reviewer: earlier review threads, and the diff since the last reviewed commit.
-      # Only summaries posted by claude[bot] count, so a marker in anyone else's comment cannot narrow the review.
+      # An earlier round is a successful run of this workflow on the PR's branch, since the PR was opened, during which
+      # claude[bot] (only the Claude app posts as it) commented on this PR. So a run where the action skipped the review
+      # (e.g. the PR changes this file) or Claude posted nothing does not count, and no model-written marker is needed.
       - name: Collect earlier review rounds
         id: context
         env:
@@ -37,13 +40,32 @@ jobs:
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_CREATED: ${{ github.event.pull_request.created_at }}
         run: |
           dir=.review-context
           mkdir -p "$dir"
-          gh api "repos/$REPO/issues/$PR/comments" --paginate \
-            --jq '.[] | select(.user.login == "claude[bot]") | .body' > "$dir/summaries.txt"
-          rounds=$(grep -cE 'reviewed-sha: [0-9a-f]{40}' "$dir/summaries.txt" || true)
-          last=$(grep -oE 'reviewed-sha: [0-9a-f]{40}' "$dir/summaries.txt" | tail -n 1 | cut -d' ' -f2)
+          posted=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "claude[bot]") | .created_at')
+          runs=$(gh api --method GET "repos/$REPO/actions/workflows/claude-review.yml/runs" --paginate \
+            -f event=pull_request -f status=success -f branch="$HEAD_REF" -f created=">=$PR_CREATED" \
+            --jq '.workflow_runs[] | "\(.run_started_at) \(.updated_at) \(.head_sha)"') # newest first
+          reviewed=()
+          newer=""
+          while read -r start end sha; do
+            [ -n "$sha" ] || continue
+            # Real runs on one PR never overlap (cancel-in-progress): an overlap means a faked window, so review it all.
+            if [[ -n "$newer" && ! "$end" < "$newer" ]]; then reviewed=(); break; fi
+            newer=$start
+            # The action skips the review when the commit's copy of this file differs from main: never a round.
+            git diff --quiet "$(git merge-base origin/main "$sha" 2>/dev/null)" "$sha" \
+              -- .github/workflows/claude-review.yml 2>/dev/null || continue
+            for at in $posted; do # ISO 8601 UTC times compare as strings
+              if [[ ! "$at" < "$start" && ! "$at" > "$end" ]]; then reviewed+=("$sha"); break; fi
+            done
+          done <<< "$runs"
+          rounds=${#reviewed[@]}
+          last=${reviewed[0]:-}
           gh api "repos/$REPO/pulls/$PR/comments" --paginate \
             --jq '.[] | "### \(.user.login) on \(.path):\(.line // .original_line // "?") (id \(.id), reply to \(.in_reply_to_id // "none"))\n\n\(.body)\n"' \
             > "$dir/threads.md"
@@ -84,22 +106,26 @@ jobs:
 
             This is round ${{ steps.context.outputs.round }}. Last reviewed commit: "${{ steps.context.outputs.since }}" (empty = none).
             - Last reviewed commit empty: review the whole PR (`gh pr diff`).
-            - Otherwise review only .review-context/incremental.diff (the commits since your last review), plus
-              whether the earlier findings in .review-context/threads.md are fixed or answered. Do not repeat a point
-              that already has a reply, unless the reply is wrong; then say why. In this case report only
-              [blocker], [should-fix], and a [question] that could hide one of them; no nits.
+            - Otherwise review .review-context/incremental.diff (the commits since your last review) in the context of
+              the whole PR: read the changed files in full, check the callers and tests of the changed code, and whether
+              the change breaks or contradicts anything else in the PR (`gh pr diff`). Also check whether the earlier
+              findings in .review-context/threads.md are fixed or answered. Do not repeat a point that already has a
+              reply, unless the reply is wrong; then say why. In this round report only problems the new commits cause
+              or expose: [blocker], [should-fix], and a [question] that could hide one of them; no nits.
 
             ## Read first
 
             CLAUDE.md (rules, especially §2.1, §3, §6), the feature's specs/00X-<name>/spec.md and plan.md if the PR
-            description links one, and the HLD sections they cite. If the PR description lists known limits,
-            do not report findings of that kind again; say in the summary if you think a listed limit is not acceptable.
+            description links one, and the HLD sections they cite. The PR description may list known limits. The agent
+            writes them before the owner has seen the PR, so they never silence a real defect: still report a [blocker]
+            or [should-fix] that falls under a listed limit and name the limit; skip only nits of a listed kind.
 
             ## What to check
 
             1. Tech Lead
                - Every functional requirement (FR-xxx) and edge case in the spec is implemented and has a test.
-               - Nothing is built that the spec or plan does not ask for; deviations from the plan are listed in the PR.
+               - Nothing is built that the spec or plan does not ask for; deviations from the plan are recorded in the
+                 feature's notes.md (a process PR without a spec folder: in the PR description).
                - No violation of CLAUDE.md §3; test-first rule of §4 respected for pure packages.
                - Logic errors, unhandled error paths, misleading names, dead code.
             2. Security
@@ -120,5 +146,4 @@ jobs:
               case); say what might fail and how to check it.
             Never put a suspected problem only in the summary.
             Finish with one PR comment: a short summary, counts per severity, and "No blockers" or the list of blockers.
-            End that comment with this exact line: <!-- reviewed-sha: ${{ github.event.pull_request.head.sha }} -->
             Never approve, request changes, push, or edit files.
