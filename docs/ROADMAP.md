@@ -8,19 +8,12 @@
 
 ## Current status
 
-Updated by the agent at each workflow step (CLAUDE.md §2.1).
+Rewritten by the agent at each workflow step (CLAUDE.md §2.1); history is in git and the PRs.
 
-- **2026-11-18:** Docs done (all OQs decided, scope frozen). Private repository created (moved to `st-vietnguyen/muse-space-lab` on 2026-11-20) with labels `needs-review` and `ready`. No code yet.
-- **2026-11-20:** Issue template added (`.github/ISSUE_TEMPLATE/feature.md`). Feature 000 `workspace` is issue #1, label `needs-review`. Relabeled `ready`.
-- **2026-11-20:** Feature 000: spec, plan and tasks approved; T001–T006 done on branch `000-workspace`, CI green; merged in PR #2 (issue #1 closed).
-- **2026-11-20:** Process updates from the feature 000 retro merged (PR #3).
-- **2026-11-20:** Review pipeline (PR labels, Claude review, dependency audit, secret scan, Dependabot, SHA-pinned actions) merged (PR #4). Dependabot alerts enabled.
-- **2026-11-20:** First real Claude review ran on PR #4 (no findings). Owner decision: keep the collaborator account `vietnguyen1404`.
-- **2026-11-20:** Feature 001 `boundary-rules` is issue #6 (relabeled `ready`); spec, plan and tasks approved (incl. dependency-cruiser); T001–T006 done on branch `001-boundary-rules`, CI green; PR #7: Claude review (2 rounds, no blockers, findings fixed), phase A retro applied in the same PR (owner decision); waiting for owner review.
-- **2026-11-20:** Open: `minimatch` Dependabot alert (moderate, dev only); fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73, which Dependabot proposes once they pass the 21-day release age (about 2026-12-07). Next after merge: phase B, feature 002 `story-schema`.
-- **2026-11-20:** Feature 001 merged (PR #7, issue #6 closed); phase A done, retro applied in PR #7. Branch `process-dev-hooks` (owner request, not a roadmap feature): Lefthook git hooks (gitleaks, Prettier, ESLint, typecheck) and Claude Code agent hooks; owner reviewed the changes, PR open. Next: phase B, feature 002 `story-schema`.
-- **2026-11-20:** Git hooks and agent hooks merged (PR #8, 5 Claude review rounds). Retro: agent may edit the hook scripts in `.claude/hooks/` (reviewed in PRs; settings and git hook config stay owner-only); review-workflow changes get their own PR. Branch `process-retro-hooks`. Next: phase B, feature 002 `story-schema`.
-- **2026-11-20:** PR #9 merged. Review rounds: at most 2 Claude review rounds, then label `needs-owner` with one summary for the owner; agent self-review before `claude-review` (PR #10). The workflow part (reviewer roles, round-2 review of new commits only, earlier threads) is PR #11.
+- **Now (2026-11-23):** Phase A done (features 000–001 and process PRs, up to #11, merged). Branch `process-workflow-skills`: owner reviews tests and code of every task, skills for the workflow, new PR template, rules for other flows, guard blocks merging, pushing to `main` and adding `ready`.
+- **Next:** separate PR: the review workflow adds the `reviewed-sha` marker itself instead of the model, and checks plan deviations in `notes.md` instead of the PR description. Then phase B, feature 002 `story-schema` (issue to draft).
+- **Waiting on owner:** review of branch `process-workflow-skills`. `minimatch` Dependabot alert (moderate, dev only): fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73 once Dependabot proposes them (about 2026-12-07).
+- **Process backlog:** a bot account or GitHub App for the agent (before real projects); automate parts of the owner's step reviews (owner decision 2026-11-23: manual for now).
 
 ## Sequencing principle
 
@@ -42,7 +35,7 @@ Features are grouped into phases. After each phase there is a short retro; lesso
 | Phase | Features | Process focus |
 |---|---|---|
 | A — Tooling | 000–001 | Run the manual workflow end to end (000: per-task approval; from 001: owner approves the plan and reviews the PR) |
-| B — Living Canvas | 002–005 | Test-first on pure packages; first skills from the phase A retro |
+| B — Living Canvas | 002–005 | Test-first on pure packages: owner reviews each task's tests, then its code; first skills from the phase A retro |
 | C — Visitor gallery | 006–007 | First 3D work; Playwright scenarios in CI |
 | D — Creator backend | 008–013 | Local Supabase in CI, integration tests |
 | E — Director and launch | 014–017 | Public demo |

@@ -1,54 +1,27 @@
+<!-- If this PR depends on another, the first line is: Merge after #N -->
+
 #### References
 
-> Describe what it related
-
-- Closes #<issue>
-- Spec: `specs/00X-<name>/` (plan approved on <date>)
+- Closes #<issue> (or: none, and why)
+- Spec: `specs/00X-<name>/`, or none
 - AC met: <AC-xx, or none>
-- [Related PR URL]()
 
 #### Description
 
-> Describe what it implement
-> Describe what it changed, added, removed
+> What changed and why, in a few lines. Then **Added** / **Changed** / **Removed** when it helps.
+
+#### Checks
+
+> What proves it works beyond the unit tests: commands and their output, a failed CI run for "CI must fail" checks, manual checks. "Unit tests only" when that is all.
+
+#### Self-review
+
+> `/code-review` (plus `/security-review` when the diff touches hooks, CI, auth, uploads or publishing): what it found and what was fixed.
+
+#### Known limits
+
+> Accepted limits the reviewer should not report again, each with its reason, or "None".
 
 #### Screenshots
 
-> UI screenshots for perfect pixel
-> UI screenshots to show what is difference between before and after changing
-> UI screenshots for Lighthouse reporting
-
-#### Checklist
-
-> Note: Developer is responsible for checking your own code according to this checklist.
-
-##### Requirement:
-
-- [ ] Run correctly as the requirement.
-- [ ] All new and changes have enough test suites.
-
-##### Coding:
-
-- [ ] CI status is success (build success, all tests passed, no errors & warnings from linter).
-- [ ] Application architecture & project structure are kept.
-- [ ] Following coding conventions, coding standards.
-- [ ] All errors were handled correctly.
-
-##### Performance:
-
-- [ ] No infinity loop.
-- [ ] Requires page load in under 3s
-- [ ] No duplicated requests.
-- [ ] Minimized duplicated components.
-- [ ] No memory leak, no main thread blocking.
-
-##### Security:
-
-- [ ] No basic security flaws such as XSS, CSRF, Injection.
-- [ ] No secret keys/tokens are written in the source code.
-- [ ] No secret keys/tokens are compiled in the source build.
-- [ ] No secret keys/tokens without restriction settings are used on the FE side.
-
-##### UI/UX:
-
-- [ ] Handle animation for hover, loading, processing behaviors.
+> UI changes only: before and after. Otherwise delete this section.
