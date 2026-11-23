@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { migrate } from "./migrate.js";
 
 // Story format, version 1 (spec 002, plan "Format"). Every object is strict: unknown fields are rejected (FR-010).
 
@@ -63,13 +64,19 @@ export type StoryRule =
 
 export type StoryError = { rule: StoryRule; path: string; scene?: { index: number; id?: string }; message: string };
 
+// Upgrades the story to the current format, then validates it. Input that is not an object is left to the schema.
 export function parseStory(input: unknown): { ok: true; story: Story } | { ok: false; errors: StoryError[] } {
-  const result = storySchema.safeParse(input);
+  const upgraded =
+    typeof input === "object" && input !== null && !Array.isArray(input)
+      ? migrate(input as Record<string, unknown>)
+      : { ok: true as const, story: input };
+  if (!upgraded.ok) return upgraded;
+  const result = storySchema.safeParse(upgraded.story);
   const errors = result.success
     ? crossFieldErrors(result.data)
     : result.error.issues.map((issue) => ({ rule: ruleOf(issue), path: issue.path, message: issue.message }));
   if (errors.length === 0 && result.success) return { ok: true, story: result.data };
-  return { ok: false, errors: errors.map((error) => toStoryError(error, input)) };
+  return { ok: false, errors: errors.map((error) => toStoryError(error, upgraded.story)) };
 }
 
 type RawError = { rule: StoryRule; path: PropertyKey[]; message: string };
@@ -100,6 +107,7 @@ function crossFieldErrors(story: Story): RawError[] {
 // The rule follows from where Zod found the issue (plan "Error rules").
 function ruleOf(issue: z.core.$ZodIssue): StoryRule {
   const [top, , field, sub, param] = issue.path;
+  // migrate checks the version first; this catches a new step added without updating the schema's version.
   if (top === "schemaVersion") return "schema-version";
   if (top === "narration") return "narration";
   if (top === "transcript") return "transcript";

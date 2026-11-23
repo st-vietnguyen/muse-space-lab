@@ -20,7 +20,7 @@ The first commit on branch `002-story-schema` holds `spec.md`, `plan.md`, this f
 
 ## US3 — Read older stories
 
-- [ ] **T003** `migrate` with the step list; `parseStory` upgrades before it validates.
+- [x] **T003** `migrate` with the step list; `parseStory` upgrades before it validates.
   Tests (`tests/story-schema/migrate.test.ts`): a current-version story comes back unchanged; version missing, `"1"`, 0, 1.5 and 2 are rejected with `schema-version`; with a fake 1→2→3 step list, a version 1 story runs both steps in order, a version 2 story only the second, a version 3 story none, and version 4 is rejected; a deep-frozen input is not changed by `migrate` or `parseStory`; `parseStory` reports `schema-version` for an unknown version.
   Files: `packages/story-schema/src/migrate.ts`, `packages/story-schema/src/story.ts`, `tests/story-schema/migrate.test.ts`
   FR-001, FR-012–FR-014 · AC-13

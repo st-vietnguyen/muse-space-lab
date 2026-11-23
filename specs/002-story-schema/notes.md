@@ -8,7 +8,11 @@
 - **T002 (implementation detail):** the shared sample story of the tests moved to `tests/story-schema/sample-story.ts` (owner request after self-review); `format.test.ts` imports it.
 - **T002 (owner decision 2026-11-23):** "blank" stays as in the plan (no non-space character); a transcript of only invisible characters such as a zero-width space is accepted.
 - **T002 (known limit):** scene ids are compared exactly, without Unicode normalisation or trimming; a getter on the input that throws on a second read escapes `parseStory` (input from JSON has no getters).
+- **T003 (agent decision, owner delegated 2026-11-23):** a story whose version is missing or unknown reports only `schema-version`; its other errors are not reported (a story of an unknown version cannot be checked against the current schema). Same kind of exception as the 12-scene one above.
+- **T003 (agent decision):** `migrate` takes an object; `parseStory` sends input that is not an object straight to the schema, which reports `format`. `migrate` returns errors in the same shape as `parseStory`. `STEPS` is not exported until a caller needs it.
+- **T003 (note for the first real step):** `migrate` copies the story with `structuredClone` only when a step runs (never today). From then on, an in-process caller passing a story with a function in it gets a thrown `DataCloneError`; stories parsed from JSON cannot contain one.
 
 ## Process
 
 - **2026-11-23:** the owner adopted "test names start with `should`" during this feature (override of the CLAUDE.md §2.1 freeze; process PR #31). T001's tests use it.
+- **2026-11-23:** the owner asked for T003–T005 to be done without the per-task reviews and reviews the feature once, with authority for the agent to decide open points (recorded above as "agent decision").
