@@ -1,30 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { parseStory, sceneStartsMs, totalDurationMs } from "../../packages/story-schema/src/story.js";
+import { narration, story, transcript } from "./sample-story.js";
 
 // Spec 002 US1: a story is data with the three launch effects; timing is computed, never stored.
-const story = {
-  schemaVersion: 1,
-  scenes: [
-    {
-      id: "focus",
-      durationMs: 15_000,
-      caption: "Morning light on the chair.",
-      effect: { type: "cinematic-focus", params: { region: { x: 0.4, y: 0.35, width: 0.3, height: 0.4 } } },
-    },
-    {
-      id: "memory",
-      durationMs: 25_000,
-      effect: { type: "memory-reveal", params: { assetId: "archival-photo", placement: "beside" } },
-    },
-    { id: "reveal", durationMs: 25_000, caption: "The whole room.", effect: { type: "final-reveal", params: {} } },
-  ],
-};
-
-const narrated = {
-  ...story,
-  narration: { assetId: "narration", startAtMs: 5_000, durationMs: 55_000 },
-  transcript: "She sat here every morning.",
-};
+const narrated = { ...story, narration, transcript };
 
 describe("a story with the three launch effects", () => {
   test.each([

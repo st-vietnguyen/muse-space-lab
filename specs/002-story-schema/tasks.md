@@ -13,9 +13,9 @@ The first commit on branch `002-story-schema` holds `spec.md`, `plan.md`, this f
 
 ## US2 — Reject invalid stories
 
-- [ ] **T002** Rule codes, the rules across fields, and errors naming rule, path and scene.
+- [x] **T002** Rule codes, the rules across fields, and errors naming rule, path and scene.
   Tests (`tests/story-schema/validate.test.ts`, one table row per case with its expected `{ rule, scene }`). Rejected: no scenes; 13 scenes; 5 min + 1 ms; duration missing, 0, −1, 1.5; narration 1 ms past the end; narration with no transcript and with a blank one; region with x + width > 1, negative x, zero width; unknown effect; missing effect; Final Reveal with params; Memory Reveal without `assetId`; unknown placement; empty caption; repeated scene id (names the second scene); unknown field on the story; input that is not an object. Accepted: 12 scenes; exactly 5 min; narration ending exactly at the end; narration from 0; region touching the edge, including `x = 0.123456789`, `width = 1 − x`; captions with no narration; a transcript with no narration; narration from 5 s lasting 55 s in 65 s.
-  Files: `packages/story-schema/src/story.ts`, `tests/story-schema/validate.test.ts`
+  Files: `packages/story-schema/src/story.ts`, `tests/story-schema/validate.test.ts`, `tests/story-schema/sample-story.ts`, `tests/story-schema/format.test.ts`
   FR-002–FR-007, FR-009–FR-011 · AC-13
 
 ## US3 — Read older stories
