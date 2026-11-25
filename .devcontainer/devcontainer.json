@@ -18,5 +18,10 @@
   // --no-use: nvm fails to load while the version in .nvmrc is not installed yet. The last check fails the setup when the
   // git hooks were not installed ("prepare" in package.json skips them silently when git refuses the repo).
   "postCreateCommand": "bash -c '. \"$NVM_DIR/nvm.sh\" --no-use && nvm install && corepack enable && pnpm install --frozen-lockfile && grep -q lefthook \"$(git rev-parse --git-path hooks/pre-commit)\"'",
-  "customizations": { "vscode": { "extensions": ["anthropic.claude-code"] } }
+  "customizations": {
+    "vscode": {
+      "extensions": ["anthropic.claude-code"],
+      "settings": { "git.terminalAuthentication": false, "github.gitAuthentication": false }
+    }
+  }
 }
