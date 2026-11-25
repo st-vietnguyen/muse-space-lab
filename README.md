@@ -30,7 +30,7 @@ AI agents work in the dev container (`.devcontainer/`). It has the same Node.js 
    "dev.containers.dockerCredentialHelper": false
    ```
 
-   The extension also forwards the host's SSH agent. With `AddKeysToAgent yes` in `~/.ssh/config`, every `git push` on the host loads a key back into that agent. So for the GitHub hosts in `~/.ssh/config`, set `IdentityAgent none` (the key file and the Keychain passphrase still work), then run `ssh-add -D` once.
+   The extension also forwards the host's SSH agent, with every key in it: GitHub keys and server keys alike. A host in `~/.ssh/config` with `AddKeysToAgent yes` loads its key back into the agent on every connection from the host. So keep the agent empty for every host: drop `AddKeysToAgent yes`, or set `IdentityAgent none` under `Host *` (the key files and the Keychain passphrase still work). Then run `ssh-add -D` once.
 
    VS Code's own GitHub sign-in could also answer git in the container. `.devcontainer/devcontainer.json` turns this off for the container (`git.terminalAuthentication` and `github.gitAuthentication` set to false).
 2. **Clone into a volume.** Run "Dev Containers: Clone Repository in Container Volume…" with `https://github.com/st-vietnguyen/muse-space-lab`. The repo then lives in a Docker volume, not in a host folder.
