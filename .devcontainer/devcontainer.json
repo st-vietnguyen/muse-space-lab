@@ -1,0 +1,22 @@
+// Sandbox for AI agents (README "Sandbox", CLAUDE.md §6). Open it with "Dev Containers: Clone Repository in Container
+// Volume": the repo lives in a Docker volume, so no host folder, .env file or credential is mounted.
+// Node.js comes from .nvmrc (nvm) and pnpm from package.json "packageManager" (Corepack): the same files CI reads.
+// Only the owner edits this folder (.claude/hooks/rules.mjs): initializeCommand runs on the host, mounts bring host
+// files in.
+{
+  "name": "MuseSpace",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "none", "nodeGypDependencies": false },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "containerEnv": {
+    "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0",
+    // The repo is on another filesystem than the home folder, so pnpm would put its store inside the repo.
+    "npm_config_store_dir": "/home/vscode/.local/share/pnpm/store"
+  },
+  // --no-use: nvm fails to load while the version in .nvmrc is not installed yet. The last check fails the setup when the
+  // git hooks were not installed ("prepare" in package.json skips them silently when git refuses the repo).
+  "postCreateCommand": "bash -c '. \"$NVM_DIR/nvm.sh\" --no-use && nvm install && corepack enable && pnpm install --frozen-lockfile && grep -q lefthook \"$(git rev-parse --git-path hooks/pre-commit)\"'",
+  "customizations": { "vscode": { "extensions": ["anthropic.claude-code"] } }
+}
