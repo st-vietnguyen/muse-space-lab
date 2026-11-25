@@ -26,13 +26,21 @@ const HOOK_FILE = `(${[
   String.raw`\.devcontainer(\.json)?(?![\w.-])`,
 ].join("|")})`;
 const HOOK_FILE_PATH = new RegExp(`(^|/)${HOOK_FILE}`, "i");
-// A write (rm, mv, cp, ln, chmod, tee, truncate, sed -i, a redirect but not `2>&1`) to one of them on the same line.
+// A write (rm, mv, cp, ln, chmod, tee, truncate, dd, install, sed -i, a redirect but not `2>&1`) to one of them on the
+// same line.
 // ponytail: a write whose target is on a later line (inside `$(...)` or quotes) is missed; the newline limit is what
 // lets `cmd 2>/dev/null` followed by `cat .git/config` through.
 const WRITE_HOOK_FILE = new RegExp(
-  String.raw`(\b(rm|mv|cp|ln|chmod|tee|truncate)\b|\bsed\b[^|;&\n]*\s(-[a-zA-Z]*i|--i[\w-]*)|>(\||&(?!\d))?)[^|;&\n]*(?<![\w.-])${HOOK_FILE}`,
+  String.raw`(\b(rm|mv|cp|ln|chmod|tee|truncate|dd|install)\b|\bsed\b[^|;&\n]*\s(-[a-zA-Z]*i|--i[\w-]*)|>(\||&(?!\d))?)[^|;&\n]*(?<![\w.-])${HOOK_FILE}`,
   "i",
 );
+// A cd into a folder that holds one of them, at any depth: a write after it can use a relative path
+// (`cd .git/info && echo x > ../config`). Only where a command can start, so `--format=%cd` or "CI/CD" is not a cd.
+// Keep the list in step with HOOK_FILE.
+// ponytail: it also blocks reading there (`cd .git && git log`) and a cd into `.claude/hooks` or `.claude/skills`, whose
+// files agents may edit; match `.claude` only as the last part if that gets in the way and `../settings.json` is accepted.
+const CD_HOOK_DIR =
+  /(?<![^\s;&|(`])(cd|pushd|chdir)\b[^|;&\n]*(?<![\w.-])(\.git|\.config|\.claude|\.devcontainer)(?![\w.-])/i;
 const HOOK_REASON =
   "Blocked: git hooks, git config files, Lefthook and gitleaks config, Claude Code settings and the dev container config are changed only by the owner.";
 const WRITE_TOOLS = ["Edit", "MultiEdit", "Write", "NotebookEdit"];
@@ -65,8 +73,8 @@ const SKIP_HOOK_FLAGS = [
   [new RegExp(git("commit") + String.raw`[^;&|]*\s-[a-zA-Z]*n[a-zA-Z]*\b`), "git commit -n"],
 ];
 
-// Settings and commands that turn hooks off. Matched on the raw command, because keys and values are often quoted.
-// `+=` sets a variable too.
+// Settings and commands that turn hooks off. Matched on `rawAndJoined`, because keys and values are often quoted. `+=`
+// sets a variable too.
 /** @type {[RegExp, string][]} */
 const CHANGE_HOOKS = [
   [/\bLEFTHOOK(_EXCLUDE)?\+?=/, "LEFTHOOK=0"],
@@ -151,6 +159,9 @@ export function check(toolName, input) {
       command.replace(/"[^"]*"|'[^']*'/g, (m) => (m[0] === "'" ? "''" : m)),
       command.replace(/'[^']*'/g, "''"),
     ];
+    // Quotes and backslashes removed: the words as the shell joins them (`core.hooks''Path`, `.gi''t/config`). The raw
+    // command is checked too: it keeps the word boundary a quote gives (`env -S'LEFTHOOK=0'`).
+    const rawAndJoined = [command, command.replace(/['"\\]/g, "")];
     if (isRmRf(unquoted)) return "Blocked: destructive command (rm -rf). Ask the owner to run it.";
     for (const [pattern, name] of DESTRUCTIVE) {
       if (pattern.test(unquoted)) return `Blocked: destructive command (${name}). Ask the owner to run it.`;
@@ -159,9 +170,10 @@ export function check(toolName, input) {
       if (pattern.test(unquoted)) return `Blocked: skipping or changing git hooks (${name}) is not allowed.`;
     }
     for (const [pattern, name] of CHANGE_HOOKS) {
-      if (pattern.test(command)) return `Blocked: skipping or changing git hooks (${name}) is not allowed.`;
+      if (rawAndJoined.some((text) => pattern.test(text)))
+        return `Blocked: skipping or changing git hooks (${name}) is not allowed.`;
     }
-    if (WRITE_HOOK_FILE.test(command)) return HOOK_REASON;
+    if (rawAndJoined.some((text) => WRITE_HOOK_FILE.test(text) || CD_HOOK_DIR.test(text))) return HOOK_REASON;
     if (singleUnquoted.some((text) => PR_MERGE.test(text)) || MERGE.some((pattern) => pattern.test(command)))
       return MERGE_REASON;
     if (READY_LABEL.some((pattern) => pattern.test(command))) return READY_REASON;

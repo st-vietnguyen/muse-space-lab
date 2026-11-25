@@ -186,7 +186,21 @@ describe("agent guard blocks", () => {
     "sed --in-place 's/a/b/' .devcontainer/devcontainer.json",
     "sed --in 's/a/b/' .git/config",
     "echo x > .GIT/CONFIG",
-  ])("should block writing the dev container or git config from Bash: %s", (command) => {
+    // Other writers, and a cd into the folder, after which the write target is relative.
+    "dd if=/tmp/x of=.git/config",
+    "install -m 644 /tmp/x .devcontainer/devcontainer.json",
+    "cd .git && echo x > config",
+    "cd .devcontainer && echo x > Dockerfile",
+    "pushd ~/.config/git && echo x > config",
+    "cd .git/info && echo x > ../config",
+    "pushd ~/.config && echo x > git/config",
+    "cd .claude && echo x > settings.json",
+    // zsh, the shell on a macOS host.
+    "chdir .git && echo x > config",
+    // The shell joins quoted parts of a path.
+    "cp /tmp/x .gi''t/config",
+    "cd .dev''container && echo x > Dockerfile",
+  ])("should block writing owner-only files from Bash: %s", (command) => {
     expect(bash(command)).toMatch(/only by the owner/);
   });
 
@@ -213,6 +227,15 @@ describe("agent guard blocks", () => {
     "git config --global -e",
     "git config -ze",
     "git config --edit",
+    // The shell joins quoted and escaped parts into one word.
+    "git config --add core.hooks''Path /dev/null",
+    `git config core.hooks""Path /dev/null`,
+    String.raw`git config core.hooks\Path /dev/null`,
+    "git config include''.path /tmp/x",
+    // The raw command is checked too: with the quotes removed, `-SLEFTHOOK=0` has no word boundary; `env -S` splits its
+    // value into a variable and a command.
+    "env -S'LEFTHOOK=0' git commit -m x",
+    "env -S'GIT_CONFIG_GLOBAL=/tmp/x' git commit -m x",
   ])("should block setting core.hooksPath from Bash, also without naming it: %s", (command) => {
     expect(bash(command)).toMatch(/changing git hooks/);
   });
@@ -304,6 +327,14 @@ describe("agent guard allows", () => {
     "cat 2>&1 .git/config",
     // A redirect on one line does not reach a path on the next one.
     "git status --short 2>/dev/null\ncat .git/config",
+    // `dd` inside `add`, a cd into a similar folder; `install`, a cd and joined quotes end at `&&`.
+    "git add .devcontainer/devcontainer.json",
+    "cd .github/workflows && ls",
+    "pnpm install && cat .devcontainer/devcontainer.json",
+    "cd /repo && cat .git/config",
+    `echo "it's" > /tmp/x && cat .git/config`,
+    // `cd` that is not a command.
+    "git log -1 --format=%cd -- .claude/settings.json",
   ])(
     "should allow reading the dev container and git config, other git config keys and similar names: %s",
     (command) => {
