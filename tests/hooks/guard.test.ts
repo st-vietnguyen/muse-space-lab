@@ -132,6 +132,113 @@ describe("agent guard blocks", () => {
   ])("writing hook files: %s %o", (tool, input) => {
     expect(check(tool, input)).toMatch(/hooks/);
   });
+
+  test.each([
+    ["Write", { file_path: "/repo/.devcontainer/devcontainer.json" }],
+    ["Edit", { file_path: "/repo/.devcontainer/Dockerfile" }],
+    ["MultiEdit", { file_path: ".devcontainer/devcontainer.json" }],
+    ["Write", { file_path: "/repo/.devcontainer/agent/devcontainer.json" }],
+    ["Write", { file_path: "/repo/.devcontainer.json" }],
+    ["Edit", { file_path: "/repo/.git/config" }],
+    ["Write", { file_path: "/repo/.git/config.worktree" }],
+    ["Edit", { file_path: "/home/vscode/.gitconfig" }],
+    ["Edit", { file_path: "~/.gitconfig" }],
+    ["Write", { file_path: "/home/vscode/.config/git/config" }],
+    ["Edit", { file_path: "/opt/homebrew/etc/gitconfig" }],
+    // A linked worktree's .git is a file pointing to its git folder.
+    ["Write", { file_path: "/repo/.git" }],
+    // macOS file systems ignore case; paths are normalized first.
+    ["Write", { file_path: "/repo/.DevContainer/devcontainer.json" }],
+    ["Edit", { file_path: "~/.GitConfig" }],
+    ["Edit", { file_path: "/repo/.claude/Settings.json" }],
+    ["Edit", { file_path: "/repo/.git/./config" }],
+    ["Edit", { file_path: "/repo/.git//config" }],
+    ["Edit", { file_path: "/repo/.git/x/../config" }],
+    // A linked worktree's own config and its pointer files.
+    ["Write", { file_path: "/repo/.git/worktrees/wt/config.worktree" }],
+    ["Write", { file_path: "/repo/.git/worktrees/wt/commondir" }],
+  ])("should block writing owner-only files with a file tool, in any case or path form: %s %o", (tool, input) => {
+    expect(check(tool, input)).toMatch(/only by the owner/);
+  });
+
+  test.each([
+    "sed -i 's/x/y/' .devcontainer/devcontainer.json",
+    "echo '{}' > .devcontainer.json",
+    "cp /tmp/x .devcontainer/Dockerfile",
+    "mv /tmp/x .devcontainer/devcontainer.json",
+    "tee .devcontainer/devcontainer.json < /tmp/x",
+    "printf '[core]' >> .git/config",
+    "cp /tmp/x ~/.gitconfig",
+    "tee -a ~/.config/git/config < /tmp/x",
+    "echo x > .git/worktrees/wt/commondir",
+    // The folder as the target.
+    "cp /tmp/x/devcontainer.json .devcontainer",
+    "cp -R /tmp/dc/. .devcontainer",
+    "rm -r .devcontainer",
+    "cp /tmp/x/config .git/",
+    "cp /tmp/x/config ~/.config/git/",
+    // Other redirects and in-place edits; case-insensitive file systems.
+    "printf '{}' >| .devcontainer.json",
+    "printf x >& .git/config",
+    "echo x >1/../.git/hooks/pre-commit",
+    "sed -E -i 's/a/b/' ~/.gitconfig",
+    "sed -Ei 's/a/b/' .git/config",
+    "sed --in-place 's/a/b/' .devcontainer/devcontainer.json",
+    "sed --in 's/a/b/' .git/config",
+    "echo x > .GIT/CONFIG",
+    // Other writers, and a cd into the folder, after which the write target is relative.
+    "dd if=/tmp/x of=.git/config",
+    "install -m 644 /tmp/x .devcontainer/devcontainer.json",
+    "cd .git && echo x > config",
+    "cd .devcontainer && echo x > Dockerfile",
+    "pushd ~/.config/git && echo x > config",
+    "cd .git/info && echo x > ../config",
+    "pushd ~/.config && echo x > git/config",
+    "cd .claude && echo x > settings.json",
+    // zsh, the shell on a macOS host.
+    "chdir .git && echo x > config",
+    // The shell joins quoted parts of a path.
+    "cp /tmp/x .gi''t/config",
+    "cd .dev''container && echo x > Dockerfile",
+  ])("should block writing owner-only files from Bash: %s", (command) => {
+    expect(bash(command)).toMatch(/only by the owner/);
+  });
+
+  test.each([
+    "git config core.hookspath /dev/null",
+    "git config CORE.HOOKSPATH /dev/null",
+    // An include or another global or system config file.
+    "git config include.path /tmp/x",
+    "git config --global include.path /tmp/x",
+    "git config INCLUDE.PATH /tmp/x",
+    "git config 'includeIf.gitdir:/workspaces/.path' /tmp/x",
+    `git config "includeIf.gitdir:**/muse[ -]space-lab/.path" /tmp/x`,
+    "GIT_CONFIG_GLOBAL=/tmp/x git commit -m x",
+    "GIT_CONFIG_GLOBAL+=/tmp/x git commit -m x",
+    "export GIT_CONFIG_SYSTEM=/tmp/x",
+    "XDG_CONFIG_HOME=/tmp/x git commit -m x",
+    "LEFTHOOK+=0 git commit -m x",
+    // Renaming a section, or the config editor; git accepts a unique prefix of a long option.
+    "git config rename-section x core",
+    "git config --rename-section x include",
+    "git config --rename-s x core",
+    "git -c core.editor='cp /tmp/x' config edit",
+    "GIT_EDITOR='cp /tmp/x' git config --ed",
+    "git config --global -e",
+    "git config -ze",
+    "git config --edit",
+    // The shell joins quoted and escaped parts into one word.
+    "git config --add core.hooks''Path /dev/null",
+    `git config core.hooks""Path /dev/null`,
+    String.raw`git config core.hooks\Path /dev/null`,
+    "git config include''.path /tmp/x",
+    // The raw command is checked too: with the quotes removed, `-SLEFTHOOK=0` has no word boundary; `env -S` splits its
+    // value into a variable and a command.
+    "env -S'LEFTHOOK=0' git commit -m x",
+    "env -S'GIT_CONFIG_GLOBAL=/tmp/x' git commit -m x",
+  ])("should block setting core.hooksPath from Bash, also without naming it: %s", (command) => {
+    expect(bash(command)).toMatch(/changing git hooks/);
+  });
 });
 
 describe("agent guard allows", () => {
@@ -189,4 +296,49 @@ describe("agent guard allows", () => {
   ])("%s %o", (tool, input) => {
     expect(check(tool, input)).toBeNull();
   });
+
+  test.each([
+    ["Read", { file_path: "/repo/.devcontainer/devcontainer.json" }],
+    ["Read", { file_path: "/repo/.git/config" }],
+    ["Write", { file_path: "/repo/docs/devcontainer.md" }],
+    ["Write", { file_path: "/repo/src/gitconfig-parser.ts" }],
+    ["Write", { file_path: "/repo/src/git/config.ts" }],
+    ["Write", { file_path: "/repo/src/git/config/index.ts" }],
+    ["Write", { file_path: "/repo/.gitignore" }],
+    ["Write", { file_path: "/repo/.github/workflows/ci.yml" }],
+    ["Write", { file_path: "/repo/.devcontainer/../docs/x.md" }],
+  ])("should allow reading the dev container and git config, and writing similar names: %s %o", (tool, input) => {
+    expect(check(tool, input)).toBeNull();
+  });
+
+  test.each([
+    "cat .devcontainer/devcontainer.json",
+    "cat .git/config",
+    "sed -n '1,5p' .git/config",
+    "git config user.name x",
+    "git config --global --add safe.directory /workspaces/muse-space-lab",
+    "git config --get remote.origin.url",
+    "git config --get-regexp alias",
+    `git config --global core.editor "code --wait"`,
+    "printenv GIT_CONFIG_GLOBAL",
+    "echo x >> .gitignore",
+    "cp -r /tmp/mirror.git /tmp/backup",
+    // `2>&1` copies a stream and writes no file.
+    "cat 2>&1 .git/config",
+    // A redirect on one line does not reach a path on the next one.
+    "git status --short 2>/dev/null\ncat .git/config",
+    // `dd` inside `add`, a cd into a similar folder; `install`, a cd and joined quotes end at `&&`.
+    "git add .devcontainer/devcontainer.json",
+    "cd .github/workflows && ls",
+    "pnpm install && cat .devcontainer/devcontainer.json",
+    "cd /repo && cat .git/config",
+    `echo "it's" > /tmp/x && cat .git/config`,
+    // `cd` that is not a command.
+    "git log -1 --format=%cd -- .claude/settings.json",
+  ])(
+    "should allow reading the dev container and git config, other git config keys and similar names: %s",
+    (command) => {
+      expect(bash(command)).toBeNull();
+    },
+  );
 });
