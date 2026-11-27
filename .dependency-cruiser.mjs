@@ -75,7 +75,8 @@ export default {
   options: {
     tsPreCompilationDeps: true,
     doNotFollow: { path: "node_modules" },
-    exclude: { path: ["node_modules", "^tests/fixtures/"] },
+    // Worktrees are full copies of the repo; each one is checked from its own root.
+    exclude: { path: ["node_modules", "^tests/fixtures/", String.raw`^\.claude/worktrees/`] },
     // Resolve workspace packages through their package.json "exports", so an import by package
     // name lands on packages/<name>/... and the path rules above apply to it.
     enhancedResolveOptions: { exportsFields: ["exports"], conditionNames: ["import", "default"] },

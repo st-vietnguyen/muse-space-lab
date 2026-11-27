@@ -11,8 +11,13 @@ const root = resolve(process.env.CLAUDE_PROJECT_DIR ?? process.cwd());
 const file = typeof input === "string" ? resolve(input) : "";
 if (!file.startsWith(root + "/")) process.exit(0);
 
-const bin = (name) => `${root}/node_modules/.bin/${name}`;
-const run = (cmd, args) => execFileSync(bin(cmd), args, { cwd: root, encoding: "utf8", stdio: "pipe" });
+// A file in a git worktree (.claude/worktrees/<name>/) is checked from that worktree, with its tools and config:
+// from the project root it is ignored (.gitignore, eslint.config.js) and path-based ESLint rules (packages/...)
+// would not match it. A new worktree needs `pnpm install` first.
+const worktree = file.slice(root.length).match(/^\/\.claude\/worktrees\/[^/]+(?=\/)/)?.[0];
+const base = root + (worktree ?? "");
+const run = (cmd, args) =>
+  execFileSync(`${base}/node_modules/.bin/${cmd}`, args, { cwd: base, encoding: "utf8", stdio: "pipe" });
 
 try {
   run("prettier", ["--write", "--ignore-unknown", "--log-level", "warn", file]);

@@ -5,5 +5,7 @@ dist/
 !.env.example
 .DS_Store
 .claude/settings.local.json
+# One git worktree per feature in progress.
+.claude/worktrees/
 # Fixture link that mimics how pnpm links a workspace package (tests/boundaries/).
 !tests/fixtures/boundaries/node_modules/
