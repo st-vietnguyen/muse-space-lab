@@ -1,7 +1,7 @@
 // Runs the hook scripts as real processes, the way Claude Code does: exit code 2 blocks, 0 allows.
 // (.mjs because the repo has no Node.js type definitions for node:child_process in TypeScript.)
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, URL } from "node:url";
@@ -10,7 +10,8 @@ import { afterEach, expect, test } from "vitest";
 const hooks = fileURLToPath(new URL("../../.claude/hooks/", import.meta.url));
 const temps = [];
 const tempDir = () => {
-  const dir = mkdtempSync(join(tmpdir(), "hooks-test-"));
+  // The real path: on macOS the temp folder is a symlink, and the fake tools log the physical `pwd`.
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "hooks-test-")));
   temps.push(dir);
   return dir;
 };
@@ -65,19 +66,25 @@ test("format hook reports a readable error when Prettier is not installed (fresh
   expect(result.stderr).toMatch(/prettier/);
 });
 
-// A project dir with fake prettier/eslint binaries that log their calls; eslint fails when the file says LINT_ERROR.
-const fakeProject = () => {
-  const root = tempDir();
-  const bin = join(root, "node_modules", ".bin");
+// Fake prettier/eslint binaries in `dir` that log their calls and working directory; eslint fails when the file says
+// LINT_ERROR. Returns a reader for the log.
+const fakeTools = (dir) => {
+  const bin = join(dir, "node_modules", ".bin");
   mkdirSync(bin, { recursive: true });
-  const log = join(root, "calls.log");
-  writeFileSync(join(bin, "prettier"), `#!/bin/sh\necho "prettier $*" >> "${log}"\n`, { mode: 0o755 });
+  const log = join(dir, "calls.log");
+  writeFileSync(join(bin, "prettier"), `#!/bin/sh\necho "prettier $* cwd=$(pwd)" >> "${log}"\n`, { mode: 0o755 });
   writeFileSync(
     join(bin, "eslint"),
-    `#!/bin/sh\necho "eslint $*" >> "${log}"\nfor f; do :; done\nif grep -q LINT_ERROR "$f"; then echo "1:1 error fake-rule"; exit 1; fi\n`,
+    `#!/bin/sh\necho "eslint $* cwd=$(pwd)" >> "${log}"\nfor f; do :; done\nif grep -q LINT_ERROR "$f"; then echo "1:1 error fake-rule"; exit 1; fi\n`,
     { mode: 0o755 },
   );
-  const calls = () => (existsSync(log) ? readFileSync(log, "utf8") : "");
+  return () => (existsSync(log) ? readFileSync(log, "utf8") : "");
+};
+
+// A project dir with the fake tools installed.
+const fakeProject = () => {
+  const root = tempDir();
+  const calls = fakeTools(root);
   const format = (file) =>
     run(join(hooks, "format.mjs"), JSON.stringify({ tool_input: { file_path: file } }), { CLAUDE_PROJECT_DIR: root });
   return { root, calls, format };
@@ -108,4 +115,52 @@ test.each([
   const { root, calls, format } = fakeProject();
   expect(format(pathFor(root)).status).toBe(0);
   expect(calls()).toBe("");
+});
+
+test("should format a worktree file with the worktree's own tools, run from the worktree root", () => {
+  const { root, calls, format } = fakeProject();
+  const worktree = join(root, ".claude", "worktrees", "003-story-clock");
+  const worktreeCalls = fakeTools(worktree);
+  const file = join(worktree, "packages", "story-schema", "src", "a.ts");
+  mkdirSync(join(file, ".."), { recursive: true });
+  writeFileSync(file, "export const a = 1;\n");
+  expect(format(file).status).toBe(0);
+  expect(worktreeCalls()).toContain(`prettier --write --ignore-unknown --log-level warn ${file} cwd=${worktree}\n`);
+  expect(worktreeCalls()).toContain(`eslint --fix --no-warn-ignored --max-warnings 0 ${file} cwd=${worktree}\n`);
+  expect(calls()).toBe("");
+});
+
+test("should report an error, not fall back to the project's tools, when a worktree has no tools installed", () => {
+  const { root, calls, format } = fakeProject();
+  const worktree = join(root, ".claude", "worktrees", "003-story-clock");
+  mkdirSync(worktree, { recursive: true });
+  const file = join(worktree, "a.ts");
+  writeFileSync(file, "export const a = 1;\n");
+  const result = format(file);
+  expect(result.status).toBe(2);
+  expect(result.stderr).toContain(join(worktree, "node_modules", ".bin", "prettier"));
+  expect(calls()).toBe("");
+});
+
+test.each([
+  ["a file directly in the worktrees folder", (root) => join(root, ".claude", "worktrees", "a.ts")],
+  ["a path that leaves a worktree with ..", (root) => `${root}/.claude/worktrees/w1/../../a.ts`],
+  ["a file in a folder with a similar name", (root) => join(root, ".claude", "worktrees-old", "w1", "a.ts")],
+])("should format %s with the project's tools, not a worktree's", (_, pathFor) => {
+  const { root, calls, format } = fakeProject();
+  const worktreeCalls = fakeTools(join(root, ".claude", "worktrees", "w1"));
+  const file = pathFor(root);
+  mkdirSync(join(file, ".."), { recursive: true });
+  writeFileSync(file, "export const a = 1;\n");
+  expect(format(file).status).toBe(0);
+  expect(calls()).toContain(`cwd=${root}\n`);
+  expect(worktreeCalls()).toBe("");
+});
+
+// Lint, the boundary rules and the tests skip .claude/worktrees/, so a committed file there would never be checked.
+test("should keep the worktrees folder out of git", () => {
+  const repo = fileURLToPath(new URL("../../", import.meta.url));
+  const result = spawnSync("git", ["ls-files", "--", ".claude/worktrees"], { cwd: repo, encoding: "utf8" });
+  expect(result.status).toBe(0);
+  expect(result.stdout).toBe("");
 });

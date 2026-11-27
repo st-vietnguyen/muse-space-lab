@@ -341,4 +341,22 @@ describe("agent guard allows", () => {
       expect(bash(command)).toBeNull();
     },
   );
+
+  // Worktrees live in .claude/worktrees/, and the cd rule covers all of .claude.
+  // ponytail: the `-C` form can still reach an owner-only file by a relative path (`pnpm -C .claude exec tee
+  // settings.json`); the guard does not catch that, with or without worktrees.
+  test.each([
+    "cd .claude/worktrees/003-story-clock && pnpm test",
+    "cd .claude/worktrees/003-story-clock && echo x > ../../settings.json",
+  ])("should block a cd into a worktree: %s", (command) => {
+    expect(bash(command)).toMatch(/only by the owner/);
+  });
+
+  test.each([
+    "pnpm -C .claude/worktrees/003-story-clock test",
+    "git -C .claude/worktrees/003-story-clock commit -F /tmp/msg.txt",
+    "git worktree add .claude/worktrees/003-story-clock -b 003-story-clock",
+  ])("should allow working in a worktree without a cd: %s", (command) => {
+    expect(bash(command)).toBeNull();
+  });
 });

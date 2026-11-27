@@ -6,7 +6,8 @@ const NETWORK = ["fetch", "XMLHttpRequest", "WebSocket", "EventSource"];
 const NO_NETWORK = "Rules 6–7: pure packages and story-runtime make no network calls.";
 
 export default defineConfig(
-  { ignores: ["**/dist/"] },
+  // Worktrees are full copies of the repo; each one is checked from its own root.
+  { ignores: ["**/dist/", ".claude/worktrees/"] },
   js.configs.recommended,
   tseslint.configs.recommended,
   // CLAUDE.md §3 rules 6–7: no network in the pure packages or story-runtime. Imports are checked by .dependency-cruiser.mjs.
