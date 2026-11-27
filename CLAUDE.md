@@ -28,7 +28,7 @@ Human in the loop: the agent proposes, the owner approves every step before it i
 - **Tasks**: grouped by user story; each task names its tests; `[P]` marks parallel tasks; list affected files; list related `AC-xx` codes.
 - **Implement**: one task at a time (skill `do-task`); the owner reviews each step locally before anything is committed:
   1. Write only the task's tests and run them; for security-sensitive logic (guards, validation, permissions) they cover ways around the rule, not only the normal case. Stop. The owner reviews the tests.
-  2. Write the code until `pnpm lint`, `pnpm typecheck` and `pnpm test` pass. Self-review the uncommitted diff (skill `self-review`: correctness, code quality, and security for the security-relevant changes it lists) and fix what holds up. Stop. The owner reviews the code and the self-review result.
+  2. Write the code until `pnpm lint`, `pnpm typecheck` and `pnpm test` pass. Self-review the uncommitted diff (skill `self-review`: correctness, code quality, frontend for React code, and security for the security-relevant changes it lists) and fix what holds up. Stop. The owner reviews the code and the self-review result.
   3. Mark the task `[x]` and commit it together with its tests and code; push.
   A task with nothing to test (config, docs) starts at step 2. Fixes from a review round follow steps 2–3.
   Deviations from the approved plan come in two kinds:
