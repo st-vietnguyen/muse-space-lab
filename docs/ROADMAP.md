@@ -8,12 +8,12 @@
 
 ## Current status
 
-Rewritten by the agent at each workflow step (CLAUDE.md §2.1); history is in git and the PRs.
+Holds only what GitHub labels cannot show (CLAUDE.md §2.1): the state of each feature is on its issue and PR (`in-progress`, `needs-owner`, `to-merge`). Rewritten in the process lane; history is in git and the PRs.
 
-- **Now (2026-11-27):** process change `process-worktrees` (first of two PRs towards an automated feature lane, owner-approved plan of 2026-11-27): the repo's checks and the format hook work with one git worktree per feature in `.claude/worktrees/`; approved and committed; next: open the PR (label `process`) and its Claude review rounds.
-- **Next:** process change `process-auto-lane` (after `process-worktrees` is merged): agents `implementer` and `reviewer`, a skill that runs `ready` features from spec to a clean PR with agent reviews of spec, tests and code, at most 2 features in parallel, and hand-over to the owner only for big decisions or what the agents cannot solve; the owner still merges. Then feature 003 `story-clock` (issue #16) as the trial run.
-- **Waiting on owner:** review and merge of the `process-worktrees` PR after its review rounds. Label `ready` on issue #16 for the trial run. Decision on the boundary finding in `specs/002-story-schema/notes.md` (imports of installed libraries are not checked; a separate `bug` PR is proposed). `minimatch` Dependabot alert (moderate, dev only): fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73 once Dependabot proposes them (about 2026-12-07).
-- **Process backlog:** a bot account or GitHub App for the agent (before real projects); automate parts of the owner's step reviews (owner decision 2026-11-23: manual for now); count the real findings the Claude review on CI still finds after `self-review` (PR descriptions) and decide at the phase B retro whether CI keeps 2 rounds, 1 round or security only; `claude-review.yml` takes its criteria from the `self-review` skill so both check the same things (read from `main`, never the PR's copy, so a PR cannot weaken its own review); Dependabot for the `.devcontainer/` base image, features and gitleaks image; a network firewall in the dev container if agents later run with fewer permission prompts.
+- **Now (2026-11-27):** process change `process-auto-lane` (second of two PRs, owner-approved plan of 2026-11-27): the feature lane of CLAUDE.md §2 with the agents `implementer` and `reviewer`, the skill `run-features`, hand-over rules (§2.3), labels `in-progress` and `to-merge`, and a coverage report (`pnpm test:coverage`); approved and committed; next: open the PR (label `process`) and its Claude review rounds.
+- **Next:** trial run of the feature lane on 003 `story-clock` (issue #16), alone; the owner reads the whole PR and notes what the agent reviews missed. Then 004 and 005, one after the other (each depends on the one before). Two features run in parallel once two `ready` issues have their dependencies merged (by the table below, 006 next to 005). Phase B retro after 005.
+- **Waiting on owner:** review and merge of the `process-auto-lane` PR. Label `ready` on issue #16. Before a run without supervision: a permission allow-list in `.claude/settings.json` (proposed in the PR) or a session in auto mode. Recommended: a ruleset on `main` (pull request and the CI checks required, no force push). Decision on the boundary finding in `specs/002-story-schema/notes.md` (imports of installed libraries are not checked; a separate `bug` PR is proposed). `minimatch` Dependabot alert (moderate, dev only): fixed by ESLint ≥ 10.15 and typescript-eslint ≥ 8.73 once Dependabot proposes them (about 2026-12-07).
+- **Process backlog:** a bot account or GitHub App for the agent (before real projects); a scheduled, headless lead session (needs the `claude` CLI and cron in the dev container, and a claim per feature so two sessions never take the same one); the coverage report in CI; the guard gap for `-C` into owner-only folders (PR #39, Known limits): patch or accept; count the real findings the Claude review on CI still finds after `self-review` (PR descriptions) and decide at the phase B retro whether CI keeps 2 rounds, 1 round or security only; `claude-review.yml` takes its criteria from the `self-review` skill so both check the same things (read from `main`, never the PR's copy, so a PR cannot weaken its own review); Dependabot for the `.devcontainer/` base image, features and gitleaks image; a network firewall in the dev container if agents later run with fewer permission prompts.
 
 ## Sequencing principle
 
@@ -35,7 +35,7 @@ Features are grouped into phases. After each phase there is a short retro; lesso
 | Phase | Features | Process focus |
 |---|---|---|
 | A — Tooling | 000–001 | Run the manual workflow end to end (000: per-task approval; from 001: owner approves the plan and reviews the PR) |
-| B — Living Canvas | 002–005 | Test-first on pure packages: owner reviews each task's tests, then its code; first skills from the phase A retro |
+| B — Living Canvas | 002–005 | Test-first on pure packages. 002: owner reviews each task's tests, then its code. From 003: the feature lane (agent reviews of spec, tests and code; the owner reads and merges the PR), one feature at a time: 003 to 005 depend on each other |
 | C — Visitor gallery | 006–007 | First 3D work; Playwright scenarios in CI |
 | D — Creator backend | 008–013 | Local Supabase in CI, integration tests |
 | E — Director and launch | 014–017 | Public demo |
@@ -75,4 +75,4 @@ MVP-0 exit: AC-15 passes at MVP-0 scope; performance is measured and recorded (O
 | 020 | `director-plus` | Undo/redo | — | 015 | — |
 | 021 | `quality-gate` | Meet performance targets on the reference device, creator usability test + playtest (one 3-person session, 15 min), per-exhibition OG stub | AC-12, AC-16 | 018–020 | OQ-12, OQ-15 |
 
-MVP-1 exit: every AC in vision §5 passes; the reviewer decides completion.
+MVP-1 exit: every AC in vision §5 passes; the owner decides completion.

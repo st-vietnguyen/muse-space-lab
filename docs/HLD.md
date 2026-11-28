@@ -441,7 +441,7 @@ Only `apps/api` and the sign-in part of `apps/web` (`apps/web/src/auth/`) may im
 | Background Jobs | None in MVP: media processing runs inline (ADR-012); pg-boss when a queue is needed |
 | Local Environment | Supabase CLI, Dev Containers |
 | Hosting (demo) | Cloudflare Pages (web, OQ-20), Render (API) |
-| Tests | Vitest (unit), Playwright (E2E) |
+| Tests | Vitest (unit; coverage report with `@vitest/coverage-v8`, approved by the owner 2026-11-27), Playwright (E2E) |
 | Lint | ESLint + typescript-eslint (approved by the owner 2026-11-20, feature 000) |
 | Boundaries | dependency-cruiser (approved by the owner 2026-11-20, feature 001) |
 | Format | Prettier (approved by the owner 2026-11-20) |

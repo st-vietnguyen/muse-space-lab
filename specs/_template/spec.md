@@ -1,6 +1,6 @@
 # Spec 00X — `<name>`
 
-**Issue:** #N · **Phase:** <A–E | MVP-1> · **Status:** Draft | Approved (date)
+**Issue:** #N · **Phase:** <A–E | MVP-1> · **Status:** Draft | Reviewed (date)
 
 <!--
 For developers and AI agents. The GitHub issue says what people need, in their words;

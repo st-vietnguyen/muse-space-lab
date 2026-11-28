@@ -16,7 +16,8 @@
 
 #### Self-review
 
-> What the tasks' self-review (skill `self-review`) found, what was fixed, and what was not and why.
+> Process lane: what the tasks' self-review (skill `self-review`) found, what was fixed, and what was not and why.
+> Feature lane: the "Review log" table from `notes.md` (breakpoint, round, findings per severity, agent tokens), and what was not fixed and why.
 > After each Claude review round on CI: how many real findings it still found (`[blocker]`/`[should-fix]`/confirmed `[question]`).
 
 #### Known limits

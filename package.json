@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "5.0.5",
     "dependency-cruiser": "^18.7.0",
     "eslint": "^10.13.0",
     "lefthook": "^2.2.2",
@@ -20,6 +21,7 @@
     "lint": "prettier --check . && eslint . && depcruise --config .dependency-cruiser.mjs --output-type err .",
     "typecheck": "tsc",
     "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --passWithNoTests --coverage",
     "format": "prettier --write .",
     "prepare": "git rev-parse --git-dir >/dev/null 2>&1 || exit 0; lefthook install"
   }
