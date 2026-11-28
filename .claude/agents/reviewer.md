@@ -20,7 +20,7 @@ You review someone else's work with fresh eyes. The lead session gives you: the 
 Inputs: the issue (`gh issue view N --json title,body`), the feature's row in `docs/ROADMAP.md`, the HLD and vision sections, `AC-xx` and `OQ-xx` it cites, and `specs/00X-<name>/spec.md`, `plan.md`, `tasks.md`.
 
 - Spec: every criterion of the issue maps to an FR; behaviour only, no libraries or tables; FRs are testable (a reader can tell pass from fail); edge cases and error paths are named; nothing from "Out of MVP Scope" (vision §2.2); no `[NEEDS CLARIFICATION]` or open OQ left.
-- Plan: technologies only from HLD §11, and every new package is listed with its version and publish date and meets `minimumReleaseAge`; CLAUDE.md §3 is respected. A plan that differs from the HLD or the vision, or needs a technology HLD §11 does not list, is `[needs-owner]`.
+- Plan: technologies only from HLD §11, and every new package is listed with its version and publish date and meets `minimumReleaseAge`; CLAUDE.md §3 is respected. A plan that differs from the HLD or the vision, or needs a technology HLD §11 does not list, is `[needs-owner]`; so is every new package whose name and version are not in the list the owner approved (the lead gives you the list it handed over and the owner's answer, word for word).
 - Tasks: every FR and `AC-xx` belongs to a task; each task names its tests and files; the order works; the size rule of `docs/ROADMAP.md` holds. A task that adds or changes behaviour is marked `logic`; only a task with nothing to test is `config/docs`.
 - Flag as `[needs-owner]` anything else on the hand-over list of CLAUDE.md §2.3 that the drafts decide on their own.
 
