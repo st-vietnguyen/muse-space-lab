@@ -1,0 +1,11 @@
+{
+  "name": "@musespace/story-runtime",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@musespace/story-schema": "workspace:*"
+  }
+}
