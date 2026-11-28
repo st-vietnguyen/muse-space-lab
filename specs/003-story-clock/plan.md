@@ -1,18 +1,18 @@
 # Plan 003 — `story-clock`
 
-Spec: [spec.md](./spec.md) · Feature lane: reviewed by the agent `reviewer` (see the "Review log" in [notes.md](./notes.md))
+Spec: [spec.md](./spec.md) · Feature lane: reviewed by the agent `reviewer` (see the "Review log" in [notes.md](./notes.md)) · Narrowed on 2026-11-28 to the position and the clock without narration (owner's decision, `notes.md`); following the narration is issue #41.
 
 ## Approach
 
-A new package `packages/story-runtime` (HLD §10) gets its first two modules, both plain TypeScript with no DOM, no global and no library: the position in a story as a pure function, and the master clock as a small state machine that reads a time source passed in by its creator. Tests live in `tests/story-runtime/` and drive the clock with a number they set and with a simulated narration.
+A new package `packages/story-runtime` (HLD §10) gets its first two modules, both plain TypeScript with no DOM, no global and no library: the position in a story as a pure function, and the master clock as a small state machine that reads a time source passed in by its creator. Tests live in `tests/story-runtime/` and drive the clock with a number they set.
 
 | Need | Choice | Why |
 |---|---|---|
 | Position (FR-001, FR-002) | `positionAt(story, timeMs)` in `src/timeline.ts`, built on `sceneStartsMs` and `totalDurationMs` of `@musespace/story-schema` | Scene starts and the length have one home (002 FR-008); the player and the clock call the same function |
-| Narration's expected position (FR-013) and the span test | `narrationMsAt(story, timeMs)` in `src/timeline.ts`: `timeMs − startAtMs` inside the span, otherwise `undefined` | One pure function answers both "where should the narration be" and "is this time inside the span" |
-| Clock (FR-003–FR-012, FR-014) | `createStoryClock(story, now)` in `src/clock.ts`; `now: () => number` is required | No global is read and no line exists that only a browser would run (trial: a default `() => performance.now()` shows as an uncovered branch in `pnpm test:coverage`) |
+| Clock (FR-003–FR-010) | `createStoryClock(story, now)` in `src/clock.ts`; `now: () => number` is required | No global is read and no line exists that only a browser would run (trial: a default `() => performance.now()` shows as an uncovered branch in `pnpm test:coverage`) |
 | No timers (FR-003) | The clock never calls `setTimeout`, `setInterval` or `requestAnimationFrame`; it computes its time when read or commanded | CLAUDE.md §3 rule 8. Tests prove it with Vitest fake timers: `vi.getTimerCount()` stays 0 over a whole run (trial) |
 | End of the story (FR-009) | `onFinished(listener)` returns a function that removes the listener | The runtime only reports events (CLAUDE.md §3 rule 7); the player removes its listener when a story closes |
+| Narration (FR-010) | The clock does not read `story.narration` | Following the narration is issue #41; until then every story plays on the time source |
 | Package entry | `package.json` `"exports": { ".": "./src/index.ts" }`, no build step; `src/index.ts` re-exports the two modules | Same `exports` field as `story-schema` (002), which also ships its TypeScript source without a build step |
 
 ### Public API (`src/index.ts`)
@@ -20,49 +20,42 @@ A new package `packages/story-runtime` (HLD §10) gets its first two modules, bo
 ```ts
 type Position = { timeMs: number; sceneIndex: number; sceneId: string; sceneProgress: number; storyProgress: number };
 function positionAt(story: Story, timeMs: number): Position;
-function narrationMsAt(story: Story, timeMs: number): number | undefined;
 
-type ClockStatus = "paused" | "playing" | "buffering" | "finished";
-type NarrationReport = { type: "playing" | "seeked" | "timeupdate"; positionMs: number } | { type: "waiting" };
-type Reading = Position & { status: ClockStatus; narrationMs?: number };
+type ClockStatus = "paused" | "playing" | "finished";
+type Reading = Position & { status: ClockStatus };
 type StoryClock = {
   read(): Reading;
   play(): void;
   pause(): void;
   seek(timeMs: number): void;
   restart(): void;
-  report(report: NarrationReport): void;
   onFinished(listener: () => void): () => void;
 };
 function createStoryClock(story: Story, now: () => number): StoryClock;
 ```
 
-`Story` is the type of `@musespace/story-schema`. `sceneIndex` counts from 0. The report types carry the names of the audio events of HLD §6.5, so 005 passes them through.
+`Story` is the type of `@musespace/story-schema`. `sceneIndex` counts from 0. Issue #41 adds the narration reports, the `buffering` status and the narration's expected position to this API.
 
 ### Clock state
 
-- The clock keeps: `playing`, `finished`, `stalled` (the narration is waiting for data) and one anchor: a story time and the time-source value at which it held.
-- It **advances** when it is playing, not finished, and not (`stalled` and inside the span). Its time is then `anchor time + (now() − anchor source value)`, otherwise the anchor time. A read never moves the anchor, so readings do not add up rounding errors.
-- Every read, command and report first brings the clock up to date: if the computed time has reached the length, the clock finishes (time = length, listeners called once, after the state is set) before the command or report is applied.
-- Setting the time (seek, restart, report) limits it to 0…length, moves the anchor to "now", clears `stalled` when the new time is outside the span, and finishes the clock when the new time is the length.
-- Status: `finished` if finished; else `paused` if not playing; else `buffering` if `stalled` (it is then inside the span); else `playing`.
+- The clock keeps: `playing`, `finished` and one anchor: a story time and the time-source value at which it held.
+- It **advances** when it is playing and not finished. Its time is then `anchor time + (now() − anchor source value)`, otherwise the anchor time. A read never moves the anchor, so readings do not add up rounding errors.
+- Every read and command first brings the clock up to date: if the computed time has reached the length, the clock finishes (time = length, listeners called once, after the state is set) before the command is applied.
+- Setting the time (seek, restart) limits it to 0…length, moves the anchor to "now", and finishes the clock when the new time is the length.
+- Status: `finished` if finished; else `playing` if playing; else `paused`.
 
 | Input | Effect |
 |---|---|
 | `play` | finished or playing: nothing. Paused: playing, anchor source value = now |
 | `pause` | finished or paused: nothing. Else: anchor at the current time, paused |
 | `seek(t)` | not a number: nothing. Finished and `t` < length: paused. Then set the time |
-| `restart` | not finished, playing, set the time to 0. `stalled` is cleared like for any time set outside the span, so it survives only when the narration starts at 0 (FR-008) |
-| report `playing` / `seeked` / `timeupdate` with `P` | no narration, finished, or current time outside the span: nothing. Else: `playing` clears `stalled`; set the time to `startAtMs + P`, `P` limited to 0…`durationMs` |
-| report `waiting` | same guard. Else: anchor at the current time, `stalled` |
+| `restart` | not finished, playing, set the time to 0 |
 
 ### Tests
 
 - `tests/story-runtime/*.test.ts`, importing `../../packages/story-runtime/src/index.js` (trial: an import by package name from `tests/` does not typecheck, because the root package does not depend on the workspace packages; 002 does the same).
-- `tests/story-runtime/stories.ts`: the reference timing (15/25/25 s, narration 5 000 + 55 000 ms) and small variants (single scene, no narration, narration from 0, narration ending with the story), each read through `parseStory`, so the tests use real `Story` values.
-- `tests/story-runtime/simulated-narration.ts`: a narration that keeps its own position against the same simulated time, can start, wait for data, resume, seek (exactly or a few ms off) and fall behind, and sends the reports to the clock.
-- Time is a variable the test sets; no test waits. The limits appear as written: `≤ 50` after a 10-minute pause, `≤ 100` after a seek, a difference of `101` corrected by the next report.
-- The run of the reference story reads `tests/fixtures/stories/the-chair-by-the-window.json` through `parseStory`.
+- `tests/story-runtime/stories.ts`: the reference timing (15/25/25 s) with and without narration and a single-scene story, each read through `parseStory`, so the tests use real `Story` values. (It also holds two narration variants written for the first scope; see `notes.md`.)
+- Time is a variable the test sets; no test waits. The limit appears as written: `≤ 50` after a 10-minute pause.
 
 ## Dependencies
 
@@ -82,16 +75,15 @@ Rule 1: this is the one runtime; nothing here is specific to the player or the p
 
 ## Docs touched
 
-None outside `specs/003-story-clock/`. HLD §6.5, §10 and §13.1 already describe this feature; the plan does not differ from them.
+None outside `specs/003-story-clock/`. HLD §6.5, §10 and §13.1 already describe this feature; the plan does not differ from them. The roadmap row for issue #41 is the owner's change (`notes.md`, "Outside this feature").
 
 ## Expected size
 
-3 tasks; 9 files besides the spec documents and the lockfile. Counted per file, about 600 hand-written lines:
+2 tasks; 7 files besides the spec documents and the lockfile; about 680 hand-written lines:
 
-| Part | Files | Lines (about) |
+| Part | Files | Lines |
 |---|---|---|
-| T001 position | `package.json` 11, `index.ts` 2, `timeline.ts` 30, `stories.ts` 30, `timeline.test.ts` 50 | 125 |
-| T002 clock without narration | `clock.ts` 80, `clock.test.ts` 140 | 220 |
-| T003 narration | `clock.ts` +35, `timeline.ts` +8, `simulated-narration.ts` 40, `narration.test.ts` 180 | 265 |
+| T001 position (done) | `package.json` 11, `index.ts` 1, `timeline.ts` 26, `stories.ts` 41, `timeline.test.ts` 78 | 157 |
+| T002 clock | `clock.ts` about 90, `index.ts` +1, `clock.test.ts` about 430 | about 520 |
 
-That is over the size rule of `docs/ROADMAP.md` (about 400 lines); tasks and files are within it. The owner decided on 2026-11-28 to keep it as one feature and accept about 600 lines (hand-over on issue #16; the answer is in `notes.md`). If the work grows clearly past this estimate, that is handed over again.
+That is over the size rule of `docs/ROADMAP.md` (about 400 lines). The owner accepted about 600 lines on 2026-11-28 and, when the tests of T002 came out three times larger than planned, decided to end this feature after T002 (about 680 lines) and move the narration to issue #41 (`notes.md`, "Owner's answers").
