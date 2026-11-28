@@ -9,6 +9,7 @@ export type Position = {
 };
 
 // Spec 003 FR-001, FR-002: where the story is at a time. Pure: the result depends only on the story and the time.
+// The story must be one that `parseStory` accepted: this function does not validate it.
 export function positionAt(story: Story, timeMs: number): Position {
   const length = totalDurationMs(story);
   const timeInStory = Math.min(Math.max(timeMs, 0), length);

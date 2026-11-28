@@ -13,8 +13,10 @@ export type StoryClock = {
   onFinished(listener: () => void): () => void;
 };
 
-// Spec 003 FR-003 to FR-010: the master clock. It reads the time source only when it is read or commanded, once
-// per call, and schedules nothing. The narration of the story has no effect on it.
+// Spec 003 FR-003 to FR-010: the master clock. It never reads the time source when it is created; a read or a
+// command reads it at most once (`onFinished` and an ignored seek do not read it) and nothing is scheduled.
+// The narration of the story has no effect on it. The story must be one that `parseStory` accepted: the clock does
+// not validate it.
 export function createStoryClock(story: Story, now: () => number): StoryClock {
   const length = totalDurationMs(story);
   const listeners = new Set<() => void>();
@@ -22,27 +24,27 @@ export function createStoryClock(story: Story, now: () => number): StoryClock {
   let finished = false;
   // The anchor: the story time and the time-source value at which it held.
   let anchorMs = 0;
-  let anchorSource = now();
+  let anchorSource = 0;
 
   // `at` is the one reading of the time source that a public call takes.
   const currentMs = (at: number): number => (playing && !finished ? anchorMs + (at - anchorSource) : anchorMs);
 
-  const finish = (at: number): void => {
+  const finish = (): void => {
     finished = true;
     anchorMs = length;
-    anchorSource = at;
-    for (const listener of [...listeners]) listener();
+    // The listeners registered now that are still registered when their turn comes.
+    for (const listener of [...listeners]) if (listeners.has(listener)) listener();
   };
 
   // Brings the clock up to date: if the end passed since the last call, it is reported first.
   const sync = (at: number): void => {
-    if (!finished && playing && currentMs(at) >= length) finish(at);
+    if (!finished && playing && currentMs(at) >= length) finish();
   };
 
   const setTime = (timeMs: number, at: number): void => {
     anchorMs = Math.min(Math.max(timeMs, 0), length);
     anchorSource = at;
-    if (anchorMs === length && !finished) finish(at);
+    if (anchorMs === length && !finished) finish();
   };
 
   return {
@@ -63,11 +65,10 @@ export function createStoryClock(story: Story, now: () => number): StoryClock {
       sync(at);
       if (finished || !playing) return;
       anchorMs = currentMs(at);
-      anchorSource = at;
       playing = false;
     },
     seek(timeMs) {
-      if (Number.isNaN(timeMs)) return;
+      if (typeof timeMs !== "number" || Number.isNaN(timeMs)) return;
       const at = now();
       sync(at);
       if (finished && timeMs < length) {

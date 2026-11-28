@@ -38,17 +38,20 @@ function createStoryClock(story: Story, now: () => number): StoryClock;
 
 ### Clock state
 
-- The clock keeps: `playing`, `finished` and one anchor: a story time and the time-source value at which it held.
+- The clock keeps: `playing`, `finished` and one anchor: a story time and the time-source value at which it held. Creating the clock reads no time source; the anchor's source value is set by `play`, `seek` and `restart` only, because it is not used while the clock is paused or finished.
+- A read or a command reads the time source at most once and uses that one value throughout; `onFinished` and an ignored seek do not read it. (Review fix: with two reads in one call, the end could fall between them.)
 - It **advances** when it is playing and not finished. Its time is then `anchor time + (now() − anchor source value)`, otherwise the anchor time. A read never moves the anchor, so readings do not add up rounding errors.
 - Every read and command first brings the clock up to date: if the computed time has reached the length, the clock finishes (time = length, listeners called once, after the state is set) before the command is applied.
 - Setting the time (seek, restart) limits it to 0…length, moves the anchor to "now", and finishes the clock when the new time is the length.
+- The listeners called for an arrival at the end are those registered when it is reached and still registered when their turn comes: one removed during the report is not called, one added during the report is first called at the next end.
 - Status: `finished` if finished; else `playing` if playing; else `paused`.
+- The clock does not validate the story; it must be one that `parseStory` accepted.
 
 | Input | Effect |
 |---|---|
 | `play` | finished or playing: nothing. Paused: playing, anchor source value = now |
-| `pause` | finished or paused: nothing. Else: anchor at the current time, paused |
-| `seek(t)` | not a number: nothing. Finished and `t` < length: paused. Then set the time |
+| `pause` | finished or paused: nothing. Else: anchor time = the current time, paused |
+| `seek(t)` | not of type number, or `NaN`: nothing (the source is not read). Finished and `t` < length: paused. Then set the time (±∞ is limited to 0 or the length) |
 | `restart` | not finished, playing, set the time to 0 |
 
 ### Tests
@@ -79,11 +82,11 @@ None outside `specs/003-story-clock/`. HLD §6.5, §10 and §13.1 already descri
 
 ## Expected size
 
-2 tasks; 7 files besides the spec documents and the lockfile; 739 hand-written lines as built (about 680 when the owner decided the split):
+2 tasks; 7 files besides the spec documents and the lockfile; 825 hand-written lines as built (about 680 when the owner decided the split):
 
 | Part | Files | Lines |
 |---|---|---|
 | T001 position (done) | `package.json` 11, `index.ts` 1, `timeline.ts` 26, `stories.ts` 41, `timeline.test.ts` 78 | 157 |
-| T002 clock (done) | `clock.ts` 93, `index.ts` +1, `clock.test.ts` 488 | 582 (about 520 expected; the rest is the FR-010 test, the tests the reviews asked for and the fix of the code review) |
+| T002 clock (done) | `clock.ts` 94, `index.ts` +1, `timeline.ts` +1, `clock.test.ts` 572 | 668 (about 520 expected; the rest is the FR-010 test, the tests that the task reviews and the review of the whole branch found missing, and their fixes) |
 
 That is over the size rule of `docs/ROADMAP.md` (about 400 lines). The owner accepted about 600 lines on 2026-11-28 and, when the tests of T002 came out three times larger than planned, decided to end this feature after T002 (about 680 lines) and move the narration to issue #41 (`notes.md`, "Owner's answers").
