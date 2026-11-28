@@ -6,7 +6,7 @@ The first commit on branch `003-story-clock` holds `spec.md`, `plan.md`, this fi
 
 ## US1 — Know where the story is
 
-- [ ] **T001** `logic` Create `packages/story-runtime` with the workspace link to `story-schema`; `positionAt`.
+- [x] **T001** `logic` Create `packages/story-runtime` with the workspace link to `story-schema`; `positionAt`.
   Tests (`tests/story-runtime/timeline.test.ts`, one table row per time with its expected position): for the reference timing 0 → scene 1, progress 0; 14 999 → scene 1, 14 999/15 000; 15 000 → scene 2, progress 0; 27 500 → scene 2, progress 0.5, story progress 27 500/65 000; 39 999.5 → scene 2; 40 000 → scene 3, progress 0; 65 000 → scene 3, scene progress 1, story progress 1; each row checks time, scene index, scene id and both progress values. −1 and −∞ give the position at 0; 65 001 and +∞ give the position at the end. A single-scene story: scene 1 at 0, in the middle and at the end. The same story and time asked twice give equal positions, and a deep-frozen story is accepted.
   Files: `packages/story-runtime/package.json`, `packages/story-runtime/src/index.ts`, `packages/story-runtime/src/timeline.ts`, `pnpm-lock.yaml`, `tests/story-runtime/timeline.test.ts`, `tests/story-runtime/stories.ts`
   FR-001, FR-002 · AC-13

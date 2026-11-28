@@ -36,6 +36,12 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@vitest/coverage-v8@5.0.5)(vite@8.3.5)
 
+  packages/story-runtime:
+    dependencies:
+      '@musespace/story-schema':
+        specifier: workspace:*
+        version: link:../story-schema
+
   packages/story-schema:
     dependencies:
       zod:

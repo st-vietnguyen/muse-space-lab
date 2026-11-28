@@ -6,6 +6,8 @@
 |---|---|---|---|---|---|
 | spec | 1 | CHANGES | 0 / 2 / 0 / 0 / 4 | Fixed: restart while buffering with narration from 0; the 4 nits. The size estimate is over the size rule: handed over, answered by the owner (see "Owner's answers") | reviewer 54 764 |
 | spec | 2 | PASS | 0 / 0 / 0 / 0 / 0 | None open, none rejected | reviewer 62 264 (same agent continued; the count includes round 1) |
+| T001 tests | 1 | PASS | 0 / 0 / 0 / 0 / 0 | None. Staged blobs: `stories.ts` f958d33, `timeline.test.ts` 7885cfd | implementer 37 486 · reviewer 36 992 |
+| T001 code | 1 | PASS | 0 / 0 / 0 / 0 / 1 | Nit not fixed, kept as a known limit (below): `positionAt` throws for a "not a number" time | implementer 41 152 (same agent continued; includes the tests phase) · reviewer 36 524 |
 
 ## Decisions of the lead
 
@@ -25,6 +27,14 @@ Taken while drafting the spec, plan and tasks (2026-11-28). Each is also an "Ass
 ## Deviations
 
 None yet.
+
+## Known limits
+
+- **T001:** `positionAt(story, NaN)` throws (no scene is found). The spec asks for "not a number" handling only at the clock's seek (FR-007), so the clock of T002 must never pass such a time on; a direct caller with a "not a number" time gets the error.
+
+## Process notes
+
+- The text report of `pnpm test:coverage` leaves out files that are fully covered, so a new file at 100% does not appear in it. Per-file numbers for the reviews were read from a `json-summary` report written to the scratchpad.
 
 ## Outside this feature
 
