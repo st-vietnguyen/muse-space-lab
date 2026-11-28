@@ -79,11 +79,11 @@ None outside `specs/003-story-clock/`. HLD §6.5, §10 and §13.1 already descri
 
 ## Expected size
 
-2 tasks; 7 files besides the spec documents and the lockfile; about 680 hand-written lines:
+2 tasks; 7 files besides the spec documents and the lockfile; 739 hand-written lines as built (about 680 when the owner decided the split):
 
 | Part | Files | Lines |
 |---|---|---|
 | T001 position (done) | `package.json` 11, `index.ts` 1, `timeline.ts` 26, `stories.ts` 41, `timeline.test.ts` 78 | 157 |
-| T002 clock | `clock.ts` about 90, `index.ts` +1, `clock.test.ts` about 430 | about 520 |
+| T002 clock (done) | `clock.ts` 93, `index.ts` +1, `clock.test.ts` 488 | 582 (about 520 expected; the rest is the FR-010 test, the tests the reviews asked for and the fix of the code review) |
 
 That is over the size rule of `docs/ROADMAP.md` (about 400 lines). The owner accepted about 600 lines on 2026-11-28 and, when the tests of T002 came out three times larger than planned, decided to end this feature after T002 (about 680 lines) and move the narration to issue #41 (`notes.md`, "Owner's answers").
